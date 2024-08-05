@@ -9,15 +9,15 @@ import (
 
 type User struct{
 	Id int `json:"id"`
-	Name string `json:"name" form:"name"`
-	Email string `json:"email" form:"email"`
-	Password string `json:"-" form:"password"`
+	Name string `json:"name" form:"name" binding:"required"`
+	Email string `json:"email" form:"email" binding:"required,email"`
+	Password string `json:"-" form:"password" binding:"required,min=8"`
 }
 
 type Response struct{
 	Success bool `json:"succes"`
 	Message string `json:"message"`
-	Results interface{} `json:"results",omitempty`
+	Results interface{} `json:"results" binding:"omitempty"`
 }
 
 type Auth struct{
@@ -28,12 +28,7 @@ type Auth struct{
 func main() {
 	r := gin.Default()
 	r.Use(corsMiddleware())
-	data := []User{
-		{Id: 1,
-		Name: "Fazz",
-		Email: "fazz@gmail.com",
-	},
-	}
+	data := []User{}
 	r.GET("/users", func(c *gin.Context){
 		c.JSON(http.StatusOK, Response{
 			Success: true,
@@ -46,25 +41,52 @@ func main() {
 
 		c.Bind(&user)
 
-		user.Id = len(data)+1
+		conv := c.Bind(&user)
 
-		// for _, item := range data{
-		// 	if user == item{
-				// c.JSON(http.StatusBadRequest, Response{
-				// 	Success: false,
-				// 	Message: "User is ready exist",
-				// 	// Results: user,
-				// })
-			// }else{
-				data = append(data, user)
-				c.JSON(http.StatusOK, Response{
-					Success: true,
-					Message: "Create user sucess",
-					Results: user,
-				})
-		// 	}
-		// }
+		dataEmail := user.Email
+		// fmt.Println(dataEmail)
 
+		// user.Id = len(data)+1
+
+		result := 0
+
+		for _, x := range data{
+			result = x.Id
+		}
+
+		user.Id = result +1
+		
+		if conv == nil{
+			compar := true
+			for compar{
+				for _, item := range data{
+					// result = item.Id
+					// fmt.Println(item)
+					if dataEmail == item.Email{
+					// if user == item{
+						c.JSON(http.StatusBadRequest, Response{
+							Success: false,
+							Message: "Email already exist",
+							// Results: user,
+						})
+						return
+					}
+				}
+				compar = false
+			}
+			data = append(data, user)
+			c.JSON(http.StatusOK, Response{
+				Success: true,
+				Message: "Create user sucess",
+				Results: user,
+			})
+		}else{
+			c.JSON(http.StatusBadRequest, Response{
+				Success: false,
+				Message: "Account does not match the criteria",
+				// Results: user,
+			})
+		}
 	})
 	r.POST("/auth/login", func(c *gin.Context){
 		user := Auth{}
@@ -181,14 +203,24 @@ func main() {
 		if selected != -1 {
 			form := User{}
 			ctx.Bind(&form)
-			data[selected].Name = form.Name
-			data[selected].Email = form.Email
-			data[selected].Password = form.Password
-			ctx.JSON(http.StatusOK, Response{
-				Success: true,
-				Message: "Update User Success",
-				Results: data[selected],
-			})
+
+			updateData := ctx.Bind(&form)
+
+			if updateData == nil{
+				data[selected].Name = form.Name
+				data[selected].Email = form.Email
+				data[selected].Password = form.Password
+				ctx.JSON(http.StatusOK, Response{
+					Success: true,
+					Message: "Update User Success",
+					Results: data[selected],
+				})
+			}else{
+				ctx.JSON(http.StatusNotFound, Response{
+					Success: false,
+					Message: "Data does not match the criteria",
+				})
+			}
 		}else{
 			ctx.JSON(http.StatusNotFound, Response{
 				Success: false,
