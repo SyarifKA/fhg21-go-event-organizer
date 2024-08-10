@@ -1,81 +1,191 @@
 package models
 
+import (
+	"context"
+	"fmt"
+
+	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
+	"github.com/jackc/pgx/v5"
+)
+
 type User struct {
 	Id       int    `json:"id"`
-	Name     string `json:"name" form:"name" binding:"required"`
 	Email    string `json:"email" form:"email" binding:"required,email"`
 	Password string `json:"-" form:"password" binding:"required,min=8"`
+	Username     string `json:"username" form:"username" binding:"required"`
 }
 
-var Data = []User{
-	{
-		Id:       1,
-		Name:     "syarif",
-		Email:    "syarif@mail.com",
-		Password: "12345678",
-	},
-}
+// var Data = []User{
+// 	{
+// 		Id:       1,
+// 		Name:     "syarif",
+// 		Email:    "syarif@mail.com",
+// 		Password: "12345678",
+// 	},
+// }
 
-func FindAllUsers(dataSource []User) []User {
-	return dataSource
-}
+// func FindAllUsers(dataSource []User) []User {
+// 	return dataSource
+// }
 
-func CreateUser(data User) User {
-	id := 0
+// func CreateUser(data User) User {
+// 	id := 0
+// 	for _, item := range Data {
+// 		id = item.Id
+// 	}
+// 	data.Id = id + 1
+// 	Data = append(Data, data)
+// 	return data
+// }
 
-	for _, item := range Data {
-		id = item.Id
+// func GetOneUser(dataSource []User, id int) User {
+// 	index := -1
+// 	for i, v := range dataSource {
+// 		if v.Id == id {
+// 			index = i
+// 		}
+// 	}
+// 	return dataSource[index]
+// }
+
+// func UpdateDataById(data User, id int) User {
+// 	ids := -1
+// 	for index, item := range Data {
+// 		if id == item.Id {
+// 			ids = index
+// 		}
+// 	}
+// 	if ids != 0 {
+// 		Data[ids].Name = data.Name
+// 		Data[ids].Email = data.Email
+// 		Data[ids].Password = data.Password
+// 		data.Id = Data[ids].Id
+// 	}
+// 	return data
+// }
+
+// func DeleteUser(id int) User {
+// 	selected := -1
+// 	userDelete := User{}
+// 	for ids, item := range Data {
+// 		if item.Id == id {
+// 			selected = ids
+// 			userDelete = item
+// 		}
+// 	}
+// 	leftSide := Data[:selected]
+// 	rightSide := Data[selected+1:]
+// 	if userDelete.Id != 0 {
+// 		Data = append(leftSide, rightSide...)
+// 	}
+// 	return userDelete
+// }
+
+// CRUD users
+
+func FindAllUsers() []User {
+	db := lib.DB()
+	defer db.Close(context.Background())
+	rows, _ := db.Query(context.Background(), `select * from "users" order by "id" asc`)
+	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
+	if err != nil {
+		fmt.Println(err)
 	}
-	data.Id = id + 1
-	Data = append(Data, data)
-	return data
+	return users
 }
 
-func GetOneUser(dataSource []User, id int) User {
-	index := -1
+func FindOneUserById(id int) User {
+	db := lib.DB()
+	defer db.Close(context.Background())
+	rows, _ := db.Query(context.Background(), `select * from "users" where id=$1`,
+		id,
+	)
+	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
 
-	for i, v := range dataSource {
-		if v.Id == id {
-			index = i
-		}
-	}
-	return dataSource[index]
-}
-
-func UpdateDataById(data User, id int) User {
-	ids := -1
-
-	for index, item := range Data {
-		if id == item.Id {
-			ids = index
-		}
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	if ids != 0 {
-		Data[ids].Name = data.Name
-		Data[ids].Email = data.Email
-		Data[ids].Password = data.Password
-		data.Id = Data[ids].Id
-	}
-	return data
-}
-
-func DeleteUser(id int) User {
-	selected := -1
-
-	userDelete := User{}
-
-	for ids, item := range Data {
+	user := User{}
+	for _, item := range users {
 		if item.Id == id {
-			selected = ids
-			userDelete = item
+			user = item
 		}
 	}
-
-	leftSide := Data[:selected]
-	rightSide := Data[selected+1:]
-	if userDelete.Id != 0 {
-		Data = append(leftSide, rightSide...)
-	}
-	return userDelete
+	return user
 }
+
+func FindOneUserByEmail(email string) User {
+	db := lib.DB()
+	defer db.Close(context.Background())
+	rows, _ := db.Query(context.Background(), `select * from "users" where "email"=$1`,
+		email,
+	)
+	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	user := User{}
+	for _, item := range users {
+		if item.Email == email {
+			user = item
+		}
+	}
+	return user
+}
+
+func CreateUser(user User) User {
+
+	db := lib.DB()
+	defer db.Close(context.Background())
+	user.Password = lib.Encrypt(user.Password)
+	// fmt.Println(user)
+
+	row := db.QueryRow(
+		context.Background(),
+		`insert into "users" (email, password, username) values ($1, $2, $3) returning "id", "email", "password", "username"`,
+		user.Email, user.Password, user.Username,
+	)
+	
+	var results User
+	row.Scan(
+		&results.Id,
+		&results.Email,
+		&results.Password,
+		&results.Username,
+	)
+	return results
+}
+
+func DeleteUser(id int) error {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	commandTag, err := db.Exec(
+		context.Background(),
+		`delete from "users" where id=$1`,
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to execute delete")
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
+}
+
+func EditUser(email string, username string, password string, id string) {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	dataSql := `update "users" set (email , username, password) = ($1, $2, $3) where id=$4`
+
+	db.Exec(context.Background(), dataSql, email, username, password, id)
+}
+
+// CRUD nationalities
