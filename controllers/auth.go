@@ -13,53 +13,51 @@ type Token struct{
 	JWToken string `json:"token"`
 }
 
-func AuthRegister(ctx *gin.Context){
-	// var form FormRegister
+// type FormRegister struct {
+// 	// Id int `json:"id"`
+// 	FullName        string `json:"fullName" form:"fullName" db:"full_name"`
+// 	Email           string `json:"email" form:"email" db:"email"`
+// 	Password        string `json:"-" form:"password" db:"password"`
+// 	ConfirmPassword string `json:"-" form:"confirmPassword" binding:"eqfield=password" db:"password"`
+// }
+
+func AuthRegister(ctx *gin.Context) {
+	form := models.JoinProfile{}
+	// form := FormRegister{}
 	// var user models.User
 	// var profile models.Profile
 
-	form := models.FormRegister{}
-
 	err := ctx.Bind(&form)
-	// fmt.Println(form)
+	fmt.Println(form)
 	if err != nil{
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
-			Message: "Failed to Register",
+			Message: "Register Failed",
+			Results: form,
 		})
 		return
 	}
 
-	fmt.Println(form)
+	createProfile := models.CreateProfile(form)
 
-	data := models.RegisterUser(form)
-	if data == (models.FormRegister{}) {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "Failed to Register",
-		})
-		return
-	}
+	// user.Email = form.Email
+	// user.Password = form.Password
+	// profile.FullName = form.FullName
+	// createUser := models.CreateUser(user)
+
+	// userId := createUser.Id
+	// profile.UserId = userId
+
+	// createProfile := models.CreateProfile(profile)
+	// createProfile.Email = form.Email
+	// createProfile.FullName = form.FullName
+	// createProfile.Password = form.Password
+
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
-		Message: "Register successfully",
-		Results: data,
+		Message: "Register Success",
+		Results: createProfile,
 	})
-
-	// id, _ := strconv.Atoi(ctx.Param("id"))
-	// user := models.FindProfileByUserId(id)
-	// if user != (models.Profile{}){
-	// 	ctx.JSON(http.StatusOK, lib.Response{
-	// 		Success: true,
-	// 		Message: "Detail user",
-	// 		Results: user,
-	// 	})
-	// }else{
-	// 	ctx.JSON(http.StatusNotFound, lib.Response{
-	// 		Success: false,
-	// 		Message: "User not found",
-	// 	})	
-	// }
 }
 
 func AuthLogin(ctx *gin.Context) {

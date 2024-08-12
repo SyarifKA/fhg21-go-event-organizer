@@ -140,34 +140,35 @@ func CreateUser(ctx *gin.Context) {
 func UpdateUser(c *gin.Context) {
     param := c.Param("id")
     id, _ := strconv.Atoi(param)
-    data := models.FindAllUsers()
-
+    // data := models.FindAllUsers()
     user := models.User{}
     err := c.Bind(&user)
     if err != nil {
         fmt.Println(err)
         return
     }
-    result := models.User{}
-    for _, v := range data {
-        if v.Id == id {
-            result = v
-        }
-    }
+	userUpdated := models.EditUser(user, id)
 
-    if result.Id == 0 {
+    // result := models.User{}
+    // for _, v := range data {
+    //     if v.Id == id {
+    //         result = v
+    //     }
+    // }
+
+    if userUpdated.Id == 0 {
         c.JSON(http.StatusNotFound, lib.Response{
             Success: false,
             Message: "user whit id " + param + " not found",
         })
         return
     }
-    models.EditUser(user.Email, user.Username, user.Password, param)
+    // models.EditUser(user.Email, user.Username, user.Password, param)
 
     c.JSON(http.StatusOK, lib.Response{
         Success: true,
         Message: "user with id " + param + " Edit Success",
-        Results: user,
+        Results: userUpdated,
     })
 }
 

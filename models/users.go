@@ -12,7 +12,7 @@ type User struct {
 	Id       int    `json:"id"`
 	Email    string `json:"email" form:"email" binding:"required,email"`
 	Password string `json:"-" form:"password" binding:"required,min=8"`
-	Username     string `json:"username" form:"username" binding:"required"`
+	Username     string `json:"username" form:"username"`
 }
 
 // var Data = []User{
@@ -137,7 +137,6 @@ func FindOneUserByEmail(email string) User {
 }
 
 func CreateUser(user User) User {
-
 	db := lib.DB()
 	defer db.Close(context.Background())
 	user.Password = lib.Encrypt(user.Password)
@@ -179,13 +178,15 @@ func DeleteUser(id int) error {
 	return nil
 }
 
-func EditUser(email string, username string, password string, id string) {
+func EditUser(user User, id int) User{
 	db := lib.DB()
 	defer db.Close(context.Background())
 
 	dataSql := `update "users" set (email , username, password) = ($1, $2, $3) where id=$4`
 
-	db.Exec(context.Background(), dataSql, email, username, password, id)
+	db.Exec(context.Background(), dataSql, user.Email, user.Username, user.Password, id)
+	user.Id = id
+	return user
 }
 
 // CRUD nationalities

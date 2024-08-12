@@ -10,10 +10,12 @@ import (
 
 type Events struct {
 	Id          int    `json:"id"`
-	Image string `json:"image" form:"image"`
-	Title       string `json:"title" form:"title" binding:"required,title" db:"title"`
-	Date        string `json:"date" form:"date" binding:"required" db:"date"`
+	Image string `json:"image" form:"image" db:"image"`
+	Title       string `json:"title" form:"title" binding:"required" db:"title"`
+	Date        string `json:"date" form:"date" db:"date"`
 	Description string `json:"description" form:"description" binding:"required" db:"description"`
+	LocationId *int `json:"locationId" db:"location_id"`
+	CreatedBy *int `json:"createdBy" db:"created_id"`
 }
 
 // "id" serial primary key,
@@ -38,7 +40,7 @@ func FindAllEvents() []Events {
 func CreateEvent(event Events) Events {
 	db := lib.DB()
 	defer db.Close(context.Background())
-	// fmt.Println(event)
+	fmt.Println(event)
 
 	row := db.QueryRow(
 		context.Background(),
@@ -46,7 +48,9 @@ func CreateEvent(event Events) Events {
 		event.Image, event.Title, event.Date, event.Description,
 	)
 	
-	var results Events
+	// var results Events
+	results := Events{}
+	fmt.Println(event.Date)
 	row.Scan(
 		&results.Id,
 		&results.Image,
@@ -55,4 +59,59 @@ func CreateEvent(event Events) Events {
 		&results.Description,
 	)
 	return results
+}
+
+func DeleteEvent(id int) error {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	commandTag, err := db.Exec(
+		context.Background(),
+		`delete from "events" where id=$1`,
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to execute delete")
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
+}
+
+func FindOneEventById(id int) Events {
+	db := lib.DB()
+	defer db.Close(context.Background())
+	rows, _ := db.Query(context.Background(), `select * from "events" where "id" = $1`,
+		id,
+	)
+	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Events])
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	event := Events{}
+	// fmt.Println(event)
+	// fmt.Println(event)
+	for _, item := range events {
+		if item.Id == id {
+			event = item
+		}
+	}
+	return event
+}
+
+func EditEvent(data Events, id int) Events {
+// func EditEvent(image string, title string, date string, description string, id string) {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	dataSql := `update "events" set (image , title, date, description) = ($1, $2, $3, $4) where "id" = $5`
+
+	db.Exec(context.Background(), dataSql, data.Image, data.Title, data.Date, data.Description, id)
+	data.Id = id
+	return data
 }

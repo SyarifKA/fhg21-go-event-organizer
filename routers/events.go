@@ -2,14 +2,15 @@ package routers
 
 import (
 	"github.com/SyarifKA/fgh21-go-event-organizer/controllers"
+	"github.com/SyarifKA/fgh21-go-event-organizer/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
 func EventsRouter(routerGroup *gin.RouterGroup) {
-	// routerGroup.Use(middlewares.AuthMiddleware())
+	routerGroup.Use(middlewares.AuthMiddleware())
 	routerGroup.GET("", controllers.ListAllEvents)
-	// routerGroup.GET("/:id", controllers.DetailUser)
-	routerGroup.POST("", controllers.CreateEvent)
-	// routerGroup.PATCH("/:id", controllers.UpdateUser)
-	// routerGroup.DELETE("/:id", controllers.DeleteUser)
+	routerGroup.GET("/:id", controllers.DetailEvent)
+	routerGroup.POST("", controllers.ListCreateEvent)
+	routerGroup.PATCH("/:id", controllers.UpdateEvent)
+	routerGroup.DELETE("/:id", controllers.DeleteEvent)
 }
