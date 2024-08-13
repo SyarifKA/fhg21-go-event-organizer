@@ -12,7 +12,7 @@ type User struct {
 	Id       int    `json:"id"`
 	Email    string `json:"email" form:"email" binding:"required,email"`
 	Password string `json:"-" form:"password" binding:"required,min=8"`
-	Username     string `json:"username" form:"username"`
+	Username     *string `json:"username" form:"username" binding:"omitempty"`
 }
 
 // var Data = []User{
@@ -97,7 +97,7 @@ func FindAllUsers() []User {
 func FindOneUserById(id int) User {
 	db := lib.DB()
 	defer db.Close(context.Background())
-	rows, _ := db.Query(context.Background(), `select * from "users" where id=$1`,
+	rows, _ := db.Query(context.Background(), `select * from "users" where "id" = $1`,
 		id,
 	)
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
@@ -162,17 +162,28 @@ func DeleteUser(id int) error {
 	db := lib.DB()
 	defer db.Close(context.Background())
 
-	commandTag, err := db.Exec(
+	commandTag1, err1 := db.Exec(
 		context.Background(),
-		`delete from "users" where id=$1`,
+		`delete from "users" where "id" = $1`,
+		id,
+	)
+	commandTag2, err2 := db.Exec(
+		context.Background(),
+		`delete from "profile" where "id" = $1`,
 		id,
 	)
 
-	if err != nil {
+	if err1 != nil {
+		return fmt.Errorf("failed to execute delete")
+	}
+	if err2 != nil {
 		return fmt.Errorf("failed to execute delete")
 	}
 
-	if commandTag.RowsAffected() == 0 {
+	if commandTag1.RowsAffected() == 0 {
+		return fmt.Errorf("user not found")
+	}
+	if commandTag2.RowsAffected() == 0 {
 		return fmt.Errorf("user not found")
 	}
 	return nil
@@ -181,6 +192,7 @@ func DeleteUser(id int) error {
 func EditUser(user User, id int) User{
 	db := lib.DB()
 	defer db.Close(context.Background())
+	user.Password = lib.Encrypt(user.Password)
 
 	dataSql := `update "users" set (email , username, password) = ($1, $2, $3) where id=$4`
 

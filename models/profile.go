@@ -75,11 +75,11 @@ func CreateProfile(data JoinProfile) *Profile {
 
 	data.Password = lib.Encrypt(data.Password)
 
-		sqlRegist := `insert into "users" 
-		("email", "password") 
-		values 
-		($1, $2) returning "id"`
-		
+	sqlRegist := `insert into "users" 
+	("email", "password") 
+	values 
+	($1, $2) returning "id"`
+	
 	var userId int
 	err1 := db.QueryRow(context.Background(), sqlRegist, data.Email, data.Password).Scan(
 		&userId,
@@ -88,7 +88,6 @@ func CreateProfile(data JoinProfile) *Profile {
 	if err1 != nil {
 		fmt.Println(err1)
 		fmt.Println("err1")
-
 	}
 
 	sqlProfile := `insert into "profile" 
@@ -130,11 +129,11 @@ func ListAllProfile()[]JoinProfile {
 	from "users" "u" 
 	join "profile" "p"
 	on "u"."id" = "p"."user_id"`
-		
+	
 	rows, _:= db.Query(
 		context.Background(),
 		joinSql,
-		)
+	)
 	
 	events, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[JoinProfile])
 	return events

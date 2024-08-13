@@ -184,6 +184,7 @@ func DeleteUser(ctx *gin.Context) {
 		return
 	}
 	err = models.DeleteUser(id)
+	fmt.Println(err)
 	if err != nil{
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,

@@ -49,8 +49,14 @@ func ListCreateEvent(ctx *gin.Context) {
 		return
 	}
 
+	createId := ctx.Keys["userId"]
+
+	idUser, _ := createId.(int)
+
+	newEvent.CreatedBy = &idUser
+	// createId := models.CreateUser(Id)
 	data := models.CreateEvent(newEvent)
-	// fmt.Println(data)
+	// fmt.Println(createId)
 	if data == (models.Events{}) {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,

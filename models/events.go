@@ -40,23 +40,23 @@ func FindAllEvents() []Events {
 func CreateEvent(event Events) Events {
 	db := lib.DB()
 	defer db.Close(context.Background())
-	fmt.Println(event)
+	// fmt.Println(event)
 
 	row := db.QueryRow(
 		context.Background(),
-		`insert into "events" (image, title, date, description) values ($1, $2, $3, $4) returning "id", "image", "title", "date", "description"`,
-		event.Image, event.Title, event.Date, event.Description,
+		`insert into "events" (image, title, date, description, location_id, created_by) values ($1, $2, $3, $4, $5, $6) returning "id", "image", "title", "date", "description", "location_id", "created_by"`,
+		event.Image, event.Title, event.Date, event.Description, event.LocationId, event.CreatedBy,
 	)
 	
-	// var results Events
 	results := Events{}
-	fmt.Println(event.Date)
 	row.Scan(
 		&results.Id,
 		&results.Image,
 		&results.Title,
 		&results.Date,
 		&results.Description,
+		&results.LocationId,
+		&results.CreatedBy,
 	)
 	return results
 }

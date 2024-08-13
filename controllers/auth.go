@@ -24,7 +24,7 @@ type Token struct{
 func AuthRegister(ctx *gin.Context) {
 	form := models.JoinProfile{}
 	// form := FormRegister{}
-	// var user models.User
+	var user models.User
 	// var profile models.Profile
 
 	err := ctx.Bind(&form)
@@ -40,10 +40,11 @@ func AuthRegister(ctx *gin.Context) {
 
 	createProfile := models.CreateProfile(form)
 
-	// user.Email = form.Email
-	// user.Password = form.Password
+	user.Email = form.Email
+	user.Password = form.Password
 	// profile.FullName = form.FullName
 	// createUser := models.CreateUser(user)
+	models.CreateUser(user)
 
 	// userId := createUser.Id
 	// profile.UserId = userId
@@ -65,6 +66,7 @@ func AuthLogin(ctx *gin.Context) {
 	ctx.Bind(&user)
 
 	found := models.FindOneUserByEmail(user.Email)
+	fmt.Println(found)
 
 	if found == (models.User{}) {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
