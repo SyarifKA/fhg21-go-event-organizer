@@ -26,15 +26,43 @@ type Events struct {
 //     "location_id" int references "locations"("id"),
 //     "created_by" int references "users"("id")
 
-func FindAllEvents() []Events {
+// func FindAllEvents() []Events {
+// 	db := lib.DB()
+// 	defer db.Close(context.Background())
+// 	rows, _ := db.Query(context.Background(), `select * from "events" order by "id" asc`)
+// 	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Events])
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	return events
+// }
+
+func FindAllEvents(search string, limit int, page int) ([]Events, int){
 	db := lib.DB()
 	defer db.Close(context.Background())
-	rows, _ := db.Query(context.Background(), `select * from "events" order by "id" asc`)
+	if page > 1 {
+		page = (page -1) * limit
+	}
+	inputSQL := `select * from "events" where "title" ilike '%' || $1 || '%' limit $2 offset $3`
+	rows, _ := db.Query(context.Background(), inputSQL , search, limit, page)
 	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Events])
 	if err != nil {
 		fmt.Println(err)
 	}
-	return events
+	count := TotalEvents(search)
+	return events, count
+}
+
+func TotalEvents(search string)int{
+	db := lib.DB()
+	defer db.Close(context.Background())
+	inputSQL := `select count(id) as "total" from "events" where "title" ilike '%' || $1 || '%'`
+	rows:= db.QueryRow(context.Background(), inputSQL, search)
+	var result int
+	rows.Scan(
+		&result,
+	)
+	return result
 }
 
 func CreateEvent(event Events) Events {

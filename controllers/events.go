@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -11,10 +12,43 @@ import (
 )
 
 func ListAllEvents(ctx *gin.Context) {
-	results := models.FindAllEvents()
+	search := ctx.Query("search")
+	limitParam := ctx.Query("limit")
+	limit, _ := strconv.Atoi(limitParam)
+	pageParam := ctx.Query("page")
+	page, _ := strconv.Atoi(pageParam)
+
+	if limit == 0 {
+		limit = 3
+	}
+
+	if page == 0 {
+		page = 1
+	}
+
+	// if page > 1 {
+	// 	page = (page -1) * limit
+	// }
+	
+	results, count := models.FindAllEvents(search, limit, page)
+	totalPage := math.Ceil(float64(count)/float64(limit))
+	
+	next := int(totalPage) - page
+	prev := page - 1
+	
+	pageInfo := lib.PageInfo{
+		TotalData: count,
+		TotalPage: int(totalPage),
+		Page: page,
+		Limit: limit,
+		Next: next,
+		Prev: prev,
+	}
+
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
 		Message: "List All Events",
+		PageInfo: pageInfo,
 		Results: results,
 	})
 }

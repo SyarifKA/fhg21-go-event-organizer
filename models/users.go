@@ -83,15 +83,32 @@ type User struct {
 
 // CRUD users
 
-func FindAllUsers() []User {
+func FindAllUsers(search string, limit int, page int) ([]User, int){
 	db := lib.DB()
 	defer db.Close(context.Background())
-	rows, _ := db.Query(context.Background(), `select * from "users" order by "id" asc`)
+	if page > 1 {
+		page = (page -1) * limit
+	}
+	inputSQL := `select * from "users" where "email" ilike '%' || $1 || '%' limit $2 offset $3`
+	rows, _ := db.Query(context.Background(), inputSQL , search, limit, page)
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
 	if err != nil {
 		fmt.Println(err)
 	}
-	return users
+	count := TotalData(search)
+	return users, count
+}
+
+func TotalData(search string)int{
+	db := lib.DB()
+	defer db.Close(context.Background())
+	inputSQL := `select count(id) as "total" from "users" where "email" ilike '%' || $1 || '%'`
+	rows:= db.QueryRow(context.Background(), inputSQL, search)
+	var result int
+	rows.Scan(
+		&result,
+	)
+	return result
 }
 
 func FindOneUserById(id int) User {
