@@ -25,10 +25,6 @@ func ListAllEvents(ctx *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
-
-	// if page > 1 {
-	// 	page = (page -1) * limit
-	// }
 	
 	results, count := models.FindAllEvents(search, limit, page)
 	totalPage := math.Ceil(float64(count)/float64(limit))
@@ -169,5 +165,31 @@ func UpdateEvent(c *gin.Context) {
         Success: true,
         Message: "event with id " + param + " Edit Success",
         Results: dataUpdated,
+    })
+}
+
+func FindSectionsByEventId(ctx *gin.Context){
+	param := ctx.Param("id")
+    id, _ := strconv.Atoi(param)
+
+	// models.FindSectionEventId(id)
+	sectionEvent := models.FindSectionEventId(id)
+
+	ctx.JSON(http.StatusOK, lib.Response{
+        Success: true,
+        Message: "List event section with id " + param,
+        Results: sectionEvent,
+    })
+}
+
+func FindAllPaymentMethod(ctx *gin.Context){
+	payment := models.PaymentMethod{}
+	results := models.FindAllPaymentMethod(payment)
+	fmt.Println(results)
+
+	ctx.JSON(http.StatusOK, lib.Response{
+        Success: true,
+        Message: "List payment methods",
+        Results: results,
     })
 }
