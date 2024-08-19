@@ -1,11 +1,11 @@
 insert into "events"
 ("image", "title", "date", "description")
 values
-('https://www.pexels.com/id-id/foto/orang-berlari-2002209/',
+('https://images.unsplash.com/photo-1645699822985-5b3389ff5b58?q=80&w=1885&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
 'borobudur marathon 2024',
 '2024-12-01T03:30:00',
 'Bank Jateng Borobudur Marathon 2024 kembali hadir! Mengundang seluruh pelari untuk bersama-sama merasakan kemeriahan gelaran Borobudur Marathon. Setiap langkah adalah bagian dari sebuah cerita besar. Selama tujuh tahun, Borobudur Marathon telah menjadi saksi ribuan kisah inspiratif. Warga Magelang dengan bangga menyambut para pelari dalam Borobudur Marathon 2024.'),
-('https://www.pexels.com/id-id/foto/repsol-4-motogp-pada-race-167641/',
+('https://images.unsplash.com/photo-1541515303410-648f4a06a67a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
 'Pertamina Grand Prix of Indonesia 2024',
 '2024-09-27T09:00:00',
 'Experience the excitement of the 2024 Pertamina Grand Prix of Indonesia at Mandalika International Circuit. Official Ticket Packages provide premium grandstand seating or MotoGP VIP Village™ hospitality. Enjoy thrilling trackside activities, including Team Garage Experience, Paddock Tours, Rider Meet & Greets, and more in Lombok.'),

@@ -19,7 +19,7 @@ func ListAllCategories(ctx *gin.Context) {
 	page, _ := strconv.Atoi(pageParam)
 
 	if limit == 0 {
-		limit = 3
+		limit = 7
 	}
 
 	if page == 0 {

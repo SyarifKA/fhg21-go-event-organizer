@@ -8,11 +8,11 @@ import (
 )
 
 type SectionEvent struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Quantity string `json:"quantity"`
-	Price    int    `json:"price"`
-	EventId int `json:"eventId"`
+	Id       	int    `json:"id"`
+	Name     	string `json:"name"`
+	Price 		int `json:"price"`
+	Quantity    int    `json:"quantity"`
+	EventId 	int `json:"eventId"`
 }
 
 func FindSectionEventId(EventId int) []SectionEvent {

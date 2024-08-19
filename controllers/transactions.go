@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
@@ -12,8 +11,8 @@ import (
 type FormTransactions struct{
 	EventId         	int `json:"eventId" form:"eventId" db:"event_id"`
 	PaymentMethodId 	int `json:"paymentMethodId" form:"paymentMethodId" db:"payment_method_id"`
-	SectionId       	[]int `json:"sectionId" form:"sectionId" db:"section_id"`
-	TicketQty       	[]int `json:"ticketQty" form:"ticketQty" db:"ticket_qty"`
+	SectionId       	[]int `json:"sectionId" form:"sectionId[]" db:"section_id"`
+	TicketQty       	[]int `json:"ticketQty" form:"ticketQty[]" db:"ticket_qty"`
 }
 
 func CreateTransaction(ctx *gin.Context) {
@@ -26,7 +25,7 @@ func CreateTransaction(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(form)
+	// fmt.Println(form)
 
 	trx := models.CreateTransaction(models.Transactions{
 		UserId: ctx.GetInt("userId"),
@@ -41,8 +40,6 @@ func CreateTransaction(ctx *gin.Context) {
 				TransactionId: trx.Id,
 		})
 	}
-
-	// transaction := models.FindOneTransactionById(trx.Id)
 
 	data := models.DetailTransactions(trx.Id)
 	// if data == (models.DetailTransaction{}) {

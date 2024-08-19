@@ -10,12 +10,12 @@ import (
 
 type Events struct {
 	Id          int    `json:"id"`
-	Image string `json:"image" form:"image" db:"image"`
+	Image 		string `json:"image" form:"image" db:"image"`
 	Title       string `json:"title" form:"title" binding:"required" db:"title"`
 	Date        string `json:"date" form:"date" db:"date"`
 	Description string `json:"description" form:"description" binding:"required" db:"description"`
-	LocationId *int `json:"locationId" db:"location_id"`
-	CreatedBy *int `json:"createdBy" db:"created_id"`
+	LocationId 	*int `json:"locationId" db:"location_id"`
+	CreatedBy 	*int `json:"createdBy" db:"created_id"`
 }
 
 // "id" serial primary key,
@@ -40,11 +40,12 @@ type Events struct {
 func FindAllEvents(search string, limit int, page int) ([]Events, int){
 	db := lib.DB()
 	defer db.Close(context.Background())
+	offset := 0
 	if page > 1 {
-		page = (page -1) * limit
+		offset = (page -1) * limit
 	}
 	inputSQL := `select * from "events" where "title" ilike '%' || $1 || '%' limit $2 offset $3`
-	rows, _ := db.Query(context.Background(), inputSQL , search, limit, page)
+	rows, _ := db.Query(context.Background(), inputSQL , search, limit, offset)
 	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Events])
 	if err != nil {
 		fmt.Println(err)
@@ -115,21 +116,19 @@ func FindOneEventById(id int) Events {
 	rows, _ := db.Query(context.Background(), `select * from "events" where "id" = $1`,
 		id,
 	)
-	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Events])
+	events, err := pgx.CollectOneRow(rows, pgx.RowToStructByPos[Events])
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	event := Events{}
-	// fmt.Println(event)
-	// fmt.Println(event)
-	for _, item := range events {
-		if item.Id == id {
-			event = item
-		}
-	}
-	return event
+	// event := Events{}
+	// for _, item := range events {
+	// 	if item.Id == id {
+	// 		event = item
+	// 	}
+	// }
+	return events
 }
 
 func EditEvent(data Events, id int) Events {

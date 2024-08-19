@@ -7,10 +7,10 @@ import (
 )
 
 func CategoriesRouter(routerGroup *gin.RouterGroup) {
-	routerGroup.Use(middlewares.AuthMiddleware())
+	// routerGroup.Use(middlewares.AuthMiddleware())
 	routerGroup.GET("", controllers.ListAllCategories)
 	routerGroup.GET("/:id", controllers.DetailCategories)
-	routerGroup.POST("", controllers.CreateCategories)
-	routerGroup.PATCH("/:id", controllers.UpdateCategories)
-	routerGroup.DELETE("/:id", controllers.DeleteCategories)
+	routerGroup.POST("",middlewares.AuthMiddleware(), controllers.CreateCategories)
+	routerGroup.PATCH("/:id",middlewares.AuthMiddleware(), controllers.UpdateCategories)
+	routerGroup.DELETE("/:id",middlewares.AuthMiddleware(), controllers.DeleteCategories)
 }

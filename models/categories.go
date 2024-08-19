@@ -9,18 +9,19 @@ import (
 )
 
 type Categories struct {
-	Id       int    `json:"id"`
-	Name string `json:"name" form:"name"`
+	Id      int    `json:"id"`
+	Name 	string `json:"name" form:"name"`
 }
 
 func FindAllCategories(search string, limit int, page int) ([]Categories, int){
 	db := lib.DB()
 	defer db.Close(context.Background())
+	offset := 0
 	if page > 1 {
-		page = (page -1) * limit
+		offset = (page -1) * limit
 	}
 	inputSQL := `select * from "categories" where "name" ilike '%' || $1 || '%' limit $2 offset $3`
-	rows, _ := db.Query(context.Background(), inputSQL , search, limit, page)
+	rows, _ := db.Query(context.Background(), inputSQL , search, limit, offset)
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Categories])
 	if err != nil {
 		fmt.Println(err)

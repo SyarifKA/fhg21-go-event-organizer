@@ -158,19 +158,6 @@ func FindTransactionByUserId(id int)[]DetailTransaction{
 	)
 
 	sectionEvent, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[DetailTransaction])
-	// details := []DetailTransaction{}
-	// rows.Scan(
-	// 	// &details.Id,
-	// 	&details.TransactionId,
-	// 	&details.FullName,
-	// 	&details.Title,
-	// 	&details.LocationId,
-	// 	&details.Date,
-	// 	&details.PaymentMethodId,
-	// 	&details.TicketSection,
-	// 	&details.TicketQty,
-	// )
-	fmt.Println(sectionEvent)
-	// transaction, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[DetailTransaction])
+
 	return sectionEvent
 }

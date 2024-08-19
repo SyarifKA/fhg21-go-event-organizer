@@ -13,17 +13,8 @@ type Token struct{
 	JWToken string `json:"token"`
 }
 
-// type FormRegister struct {
-// 	// Id int `json:"id"`
-// 	FullName        string `json:"fullName" form:"fullName" db:"full_name"`
-// 	Email           string `json:"email" form:"email" db:"email"`
-// 	Password        string `json:"-" form:"password" db:"password"`
-// 	ConfirmPassword string `json:"-" form:"confirmPassword" binding:"eqfield=password" db:"password"`
-// }
-
 func AuthRegister(ctx *gin.Context) {
 	form := models.JoinProfile{}
-	// form := FormRegister{}
 	var user models.User
 	// var profile models.Profile
 
@@ -33,7 +24,17 @@ func AuthRegister(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Register Failed",
-			Results: form,
+		})
+		return
+	}
+
+	dataUser := models.FindOneUserByEmail(form.Email)
+	fmt.Println(dataUser)
+
+	if dataUser.Email == form.Email{
+		ctx.JSON(http.StatusBadRequest, lib.Response{
+			Success: false,
+			Message: "Email already exist",
 		})
 		return
 	}
@@ -42,17 +43,8 @@ func AuthRegister(ctx *gin.Context) {
 
 	user.Email = form.Email
 	user.Password = form.Password
-	// profile.FullName = form.FullName
-	// createUser := models.CreateUser(user)
 	models.CreateUser(user)
 
-	// userId := createUser.Id
-	// profile.UserId = userId
-
-	// createProfile := models.CreateProfile(profile)
-	// createProfile.Email = form.Email
-	// createProfile.FullName = form.FullName
-	// createProfile.Password = form.Password
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
@@ -69,6 +61,14 @@ func AuthLogin(ctx *gin.Context) {
 	fmt.Println(found)
 
 	if found == (models.User{}) {
+		ctx.JSON(http.StatusUnauthorized, lib.Response{
+			Success: false,
+			Message: "Wrong Email or Password",
+		})
+		return
+	}
+
+	if found.Email != user.Email && found.Password != user.Password{
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
 			Message: "Wrong Email or Password",

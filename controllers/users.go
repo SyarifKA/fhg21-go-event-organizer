@@ -184,13 +184,6 @@ func UpdateUser(c *gin.Context) {
     }
 	userUpdated := models.EditUser(user, id)
 
-    // result := models.User{}
-    // for _, v := range data {
-    //     if v.Id == id {
-    //         result = v
-    //     }
-    // }
-
     if userUpdated.Id == 0 {
         c.JSON(http.StatusNotFound, lib.Response{
             Success: false,

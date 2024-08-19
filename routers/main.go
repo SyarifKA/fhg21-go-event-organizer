@@ -8,4 +8,7 @@ func RoutersCombine(r *gin.Engine) {
 		EventsRouter(r.Group("/events"))
 		CategoriesRouter(r.Group("/categories"))
 		TransactionRouter(r.Group("/transactions"))
+		ProfileRouter(r.Group("/profile"))
+		PartnersRouter(r.Group("/partners"))
+		NationalityRouter(r.Group("/nationalities"))
 }

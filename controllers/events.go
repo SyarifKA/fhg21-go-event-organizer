@@ -19,7 +19,7 @@ func ListAllEvents(ctx *gin.Context) {
 	page, _ := strconv.Atoi(pageParam)
 
 	if limit == 0 {
-		limit = 3
+		limit = 6
 	}
 
 	if page == 0 {
