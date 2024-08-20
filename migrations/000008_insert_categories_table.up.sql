@@ -4,7 +4,7 @@ values
 ('Music'),
 ('Arts'),
 ('Outdoors'),
-('Worskshop'),
+('Workshop'),
 ('Sport'),
 ('Festival'),
 ('Fashion');
