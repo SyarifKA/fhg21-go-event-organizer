@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Token struct{
+type Token struct {
 	JWToken string `json:"token"`
 }
 
@@ -20,7 +20,7 @@ func AuthRegister(ctx *gin.Context) {
 
 	err := ctx.Bind(&form)
 	fmt.Println(form)
-	if err != nil{
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Register Failed",
@@ -31,7 +31,7 @@ func AuthRegister(ctx *gin.Context) {
 	dataUser := models.FindOneUserByEmail(form.Email)
 	fmt.Println(dataUser)
 
-	if dataUser.Email == form.Email{
+	if dataUser.Email == form.Email {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Email already exist",
@@ -45,7 +45,6 @@ func AuthRegister(ctx *gin.Context) {
 	user.Password = form.Password
 	models.CreateUser(user)
 
-
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
 		Message: "Register Success",
@@ -58,27 +57,30 @@ func AuthLogin(ctx *gin.Context) {
 	ctx.Bind(&user)
 
 	found := models.FindOneUserByEmail(user.Email)
-	fmt.Println(found)
+	// fmt.Println(found)
 
 	if found == (models.User{}) {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
-			Message: "Wrong Email or Password",
+			Message: "Wrong Email or Password1",
 		})
 		return
 	}
 
-	if found.Email != user.Email && found.Password != user.Password{
+	if found.Email != user.Email && found.Password != user.Password {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
-			Message: "Wrong Email or Password",
+			Message: "Wrong Email or Password2",
 		})
 		return
 	}
 
 	isVerified := lib.Verify(user.Password, found.Password)
-
-	if isVerified{
+	fmt.Println(user.Password)
+	fmt.Println(found.Password)
+	fmt.Println(found.Id)
+	fmt.Println(isVerified)
+	if isVerified {
 		JWToken := lib.GenerateUserIdToken(found.Id)
 		ctx.JSON(http.StatusOK, lib.Response{
 			Success: true,
@@ -87,10 +89,10 @@ func AuthLogin(ctx *gin.Context) {
 				JWToken,
 			},
 		})
-	}else{
+	} else {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
-			Message: "Wrong Email or Password",
+			Message: "Wrong Email or Password3",
 		})
 	}
 }

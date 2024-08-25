@@ -103,53 +103,55 @@ func ListAllUser(ctx *gin.Context) {
 	// if page > 1 {
 	// 	page = (page -1) * limit
 	// }
-	
+
 	// totalData := models.TotalData(search)
 	results, count := models.FindAllUsers(search, limit, page)
-	totalPage := math.Ceil(float64(count)/float64(limit))
+	totalPage := math.Ceil(float64(count) / float64(limit))
 
 	next := int(totalPage) - page
 	prev := page - 1
-	
+
+	fmt.Println(results)
+	fmt.Println(count)
+
 	pageInfo := lib.PageInfo{
 		TotalData: count,
 		TotalPage: int(totalPage),
-		Page: page,
-		Limit: limit,
-		Next: next,
-		Prev: prev,
+		Page:      page,
+		Limit:     limit,
+		Next:      next,
+		Prev:      prev,
 	}
 
 	ctx.JSON(http.StatusOK, lib.Response{
-		Success: true,
-		Message: "List All Users",
+		Success:  true,
+		Message:  "List All Users",
 		PageInfo: pageInfo,
-		Results: results,
+		Results:  results,
 	})
 }
 
 func DetailUser(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	user := models.FindOneUserById(id)
-	if user != (models.User{}){
+	if user != (models.User{}) {
 		ctx.JSON(http.StatusOK, lib.Response{
 			Success: true,
 			Message: "Detail user",
 			Results: user,
 		})
-	}else{
+	} else {
 		ctx.JSON(http.StatusNotFound, lib.Response{
 			Success: false,
 			Message: "User not found",
-		})	
+		})
 	}
 }
 
 func CreateUser(ctx *gin.Context) {
 	newUser := models.User{}
 
-	if err := ctx.ShouldBind(&newUser)
-	err != nil {
+	if err := ctx.ShouldBind(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "invalid input data",
@@ -173,31 +175,50 @@ func CreateUser(ctx *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-    param := c.Param("id")
-    id, _ := strconv.Atoi(param)
-    // data := models.FindAllUsers()
-    user := models.User{}
-    err := c.Bind(&user)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	param := c.Param("id")
+	id, _ := strconv.Atoi(param)
+	// data := models.FindAllUsers()
+	user := models.User{}
+	err := c.Bind(&user)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	userUpdated := models.EditUser(user, id)
 
-    if userUpdated.Id == 0 {
-        c.JSON(http.StatusNotFound, lib.Response{
-            Success: false,
-            Message: "user whit id " + param + " not found",
-        })
-        return
-    }
-    // models.EditUser(user.Email, user.Username, user.Password, param)
+	if userUpdated.Id == 0 {
+		c.JSON(http.StatusNotFound, lib.Response{
+			Success: false,
+			Message: "user whit id " + param + " not found",
+		})
+		return
+	}
+	// models.EditUser(user.Email, user.Username, user.Password, param)
 
-    c.JSON(http.StatusOK, lib.Response{
-        Success: true,
-        Message: "user with id " + param + " Edit Success",
-        Results: userUpdated,
-    })
+	c.JSON(http.StatusOK, lib.Response{
+		Success: true,
+		Message: "user with id " + param + " Edit Success",
+		Results: userUpdated,
+	})
+}
+
+func UpdateUserPassword(ctx *gin.Context) {
+	id := ctx.GetInt("userId")
+	user := models.Password{}
+
+	err := ctx.Bind(&user)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	updatePassword := models.EditPassword(user, id)
+
+	ctx.JSON(http.StatusOK, lib.Response{
+		Success: true,
+		Message: "Update user password success",
+		Results: updatePassword,
+	})
 }
 
 func DeleteUser(ctx *gin.Context) {
@@ -213,7 +234,7 @@ func DeleteUser(ctx *gin.Context) {
 	}
 	err = models.DeleteUser(id)
 	fmt.Println(err)
-	if err != nil{
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Id not found",

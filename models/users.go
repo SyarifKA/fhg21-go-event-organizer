@@ -9,10 +9,16 @@ import (
 )
 
 type User struct {
-	Id       int    `json:"id"`
-	Email    string `json:"email" form:"email" binding:"required,email"`
-	Password string `json:"-" form:"password" binding:"required,min=8"`
-	Username     *string `json:"username" binding:"omitempty"`
+	Id       int     `json:"id"`
+	Email    string  `json:"email" form:"email" binding:"required,email"`
+	Password string  `json:"password" form:"password" binding:"required,min=8"`
+	Username *string `json:"username" binding:"omitempty"`
+}
+
+type Password struct {
+	// OldPassword     string `json:"oldPassword" form:"oldPassword"`
+	NewPassword string `json:"newPassword" form:"newPassword" db:"password"`
+	// ConfirmPassword string `json:"confirmPassword" form:"confirmPassword"`
 }
 
 // var Data = []User{
@@ -83,14 +89,15 @@ type User struct {
 
 // CRUD users
 
-func FindAllUsers(search string, limit int, page int) ([]User, int){
+func FindAllUsers(search string, limit int, page int) ([]User, int) {
 	db := lib.DB()
 	defer db.Close(context.Background())
+	offset := 0
 	if page > 1 {
-		page = (page -1) * limit
+		offset = (page - 1) * limit
 	}
 	inputSQL := `select * from "users" where "email" ilike '%' || $1 || '%' limit $2 offset $3`
-	rows, _ := db.Query(context.Background(), inputSQL , search, limit, page)
+	rows, _ := db.Query(context.Background(), inputSQL, search, limit, offset)
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
 	if err != nil {
 		fmt.Println(err)
@@ -99,11 +106,11 @@ func FindAllUsers(search string, limit int, page int) ([]User, int){
 	return users, count
 }
 
-func TotalData(search string)int{
+func TotalData(search string) int {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	inputSQL := `select count(id) as "total" from "users" where "email" ilike '%' || $1 || '%'`
-	rows:= db.QueryRow(context.Background(), inputSQL, search)
+	rows := db.QueryRow(context.Background(), inputSQL, search)
 	var result int
 	rows.Scan(
 		&result,
@@ -164,7 +171,7 @@ func CreateUser(user User) User {
 		`insert into "users" (email, password, username) values ($1, $2, $3) returning "id", "email", "password", "username"`,
 		user.Email, user.Password, user.Username,
 	)
-	
+
 	var results User
 	row.Scan(
 		&results.Id,
@@ -206,16 +213,41 @@ func DeleteUser(id int) error {
 	return nil
 }
 
-func EditUser(user User, id int) User{
+func EditUser(user User, id int) User {
 	db := lib.DB()
 	defer db.Close(context.Background())
+
 	user.Password = lib.Encrypt(user.Password)
 
 	dataSql := `update "users" set (email , username, password) = ($1, $2, $3) where id=$4`
 
-	db.Exec(context.Background(), dataSql, user.Email, user.Username, user.Password, id)
-	user.Id = id
-	return user
+	edit, err := db.Query(context.Background(), dataSql, user.Email, user.Username, user.Password, id)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	var result User
+	edit.Scan()
+	// user.Id = id
+	return result
 }
 
-// CRUD nationalities
+func EditPassword(user Password, id int) User {
+	db := lib.DB()
+	defer db.Close(context.Background())
+	fmt.Println(user.NewPassword)
+	fmt.Println(id)
+	user.NewPassword = lib.Encrypt(user.NewPassword)
+	sql := `update "users" set "password" values $1 where "id" = $2 returning "id", "password"`
+
+	change := db.QueryRow(context.Background(), sql, user.NewPassword, id)
+
+	var result User
+
+	change.Scan(
+		&result.Id,
+		&result.Email,
+		&result.Password,
+	)
+	return result
+}
