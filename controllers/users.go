@@ -6,85 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
 	"github.com/SyarifKA/fgh21-go-event-organizer/models"
+	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
 )
 
-// func ListAllUsers(ctx *gin.Context) {
-// 	results := models.FindAllUsers(models.Data)
-// 	ctx.JSON(http.StatusOK, lib.Response{
-// 		Success: true,
-// 		Message: "List all users",
-// 		Results: results,
-// 	})
-// }
-
-// func DetailUser(ctx *gin.Context){
-// 	id, _ := strconv.Atoi(ctx.Param("id"))
-// 	user := models.GetOneUser(models.Data, id)
-// 	if user != (models.User{}){
-// 		ctx.JSON(http.StatusOK, lib.Response{
-// 			Success: true,
-// 			Message: "Detail user",
-// 			Results: user,
-// 		})
-// 	}else{
-// 		ctx.JSON(http.StatusNotFound, lib.Response{
-// 			Success: false,
-// 			Message: "User not found",
-// 		})
-// 	}
-// }
-
-// func CreateUser(ctx *gin.Context) {
-//     user := models.User{}
-//     ctx.Bind(&user)
-//     data := models.CreateUser(user)
-//     ctx.JSON(http.StatusOK, lib.Response{
-//         Success: true,
-//         Message: "Create User Success",
-//         Results: data,
-//     })
-// }
-
-// func UpdateUser(c *gin.Context) {
-//     id, _:= strconv.Atoi(c.Param("id"))
-//     updatedData := models.User{}
-//     c.Bind(&updatedData)
-//     data := models.UpdateDataById(updatedData, id)
-//     if data.Id != 0 {
-//         c.JSON(http.StatusOK, lib.Response{
-//             Success: true,
-//             Message: "Update Data Success",
-//             Results: data,
-//         })
-//     } else {
-//         c.JSON(http.StatusNotFound, lib.Response{
-//             Success: false,
-//             Message: "User Not Found",
-//         })
-//     }
-// }
-
-// func DeleteUserById(c *gin.Context) {
-//     id, _:= strconv.Atoi(c.Param("id"))
-//     data := models.DeleteUser(id)
-//     if data.Id != 0 {
-//         c.JSON(http.StatusOK, lib.Response{
-//             Success: true,
-//             Message: "Delete Data Success",
-//             Results: data,
-//         })
-//     } else {
-//         c.JSON(http.StatusNotFound, lib.Response{
-//             Success: false,
-//             Message: "Data Not Found",
-//         })
-//     }
-// }
-
-// Controllers users
 func ListAllUser(ctx *gin.Context) {
 	search := ctx.Query("search")
 	limitParam := ctx.Query("limit")
@@ -105,7 +33,7 @@ func ListAllUser(ctx *gin.Context) {
 	// }
 
 	// totalData := models.TotalData(search)
-	results, count := models.FindAllUsers(search, limit, page)
+	results, count := repository.FindAllUsers(search, limit, page)
 	totalPage := math.Ceil(float64(count) / float64(limit))
 
 	next := int(totalPage) - page
@@ -133,8 +61,8 @@ func ListAllUser(ctx *gin.Context) {
 
 func DetailUser(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
-	user := models.FindOneUserById(id)
-	if user != (models.User{}) {
+	user := repository.FindOneUserById(id)
+	if user != (dtos.User{}) {
 		ctx.JSON(http.StatusOK, lib.Response{
 			Success: true,
 			Message: "Detail user",
@@ -148,48 +76,68 @@ func DetailUser(ctx *gin.Context) {
 	}
 }
 
-func CreateUser(ctx *gin.Context) {
-	newUser := models.User{}
+// func CreateUser(ctx *gin.Context) {
+// 	newUser := dtos.User{}
 
-	if err := ctx.ShouldBind(&newUser); err != nil {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "invalid input data",
-		})
+// 	if err := ctx.ShouldBind(&newUser); err != nil {
+// 		ctx.JSON(http.StatusBadRequest, lib.Response{
+// 			Success: false,
+// 			Message: "invalid input data",
+// 		})
+// 		return
+// 	}
+
+// 	data, err := repository.CreateUser(newUser)
+// 	if data == (dtos.User{}) {
+// 		ctx.JSON(http.StatusBadRequest, lib.Response{
+// 			Success: false,
+// 			Message: "Failed to create user",
+// 		})
+// 		return
+// 	}
+
+// 	lib.HandlerOK(ctx, "User created successfully", data, nil)
+// }
+
+func CreateUser(c *gin.Context) {
+	formUser := dtos.FormUser{}
+	err := c.Bind(&formUser)
+
+	if err != nil {
+		lib.HandlerBadReq(c, "data not verified")
 		return
 	}
 
-	data := models.CreateUser(newUser)
-	if data == (models.User{}) {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "Failed to create user",
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, lib.Response{
-		Success: true,
-		Message: "User created successfully",
-		Results: data,
+	data, err := repository.CreateUser(models.Users{
+		Email:    formUser.Email,
+		Password: formUser.Password,
 	})
+
+	if err != nil {
+		lib.HandlerBadReq(c, "data not verified")
+		return
+	}
+
+	lib.HandlerOK(c, "Create user success", data, nil)
 }
 
 func UpdateUser(c *gin.Context) {
 	param := c.Param("id")
 	id, _ := strconv.Atoi(param)
 	// data := models.FindAllUsers()
-	user := models.User{}
+	user := dtos.Profiles{}
 	err := c.Bind(&user)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	userUpdated := models.EditUser(user, id)
+	userUpdated := repository.EditUser(user, id)
+	fmt.Println(userUpdated)
 
 	if userUpdated.Id == 0 {
 		c.JSON(http.StatusNotFound, lib.Response{
 			Success: false,
-			Message: "user whit id " + param + " not found",
+			Message: "user with id " + param + " not found",
 		})
 		return
 	}
@@ -204,7 +152,7 @@ func UpdateUser(c *gin.Context) {
 
 func UpdateUserPassword(ctx *gin.Context) {
 	id := ctx.GetInt("userId")
-	user := models.Password{}
+	user := dtos.Password{}
 
 	err := ctx.Bind(&user)
 	if err != nil {
@@ -212,7 +160,7 @@ func UpdateUserPassword(ctx *gin.Context) {
 		return
 	}
 
-	updatePassword := models.EditPassword(user, id)
+	updatePassword := repository.EditPassword(user, id)
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
@@ -223,7 +171,7 @@ func UpdateUserPassword(ctx *gin.Context) {
 
 func DeleteUser(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
-	dataUser := models.FindOneUserById(id)
+	dataUser := repository.FindOneUserById(id)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
@@ -232,7 +180,7 @@ func DeleteUser(ctx *gin.Context) {
 		})
 		return
 	}
-	err = models.DeleteUser(id)
+	err = repository.DeleteUser(id)
 	fmt.Println(err)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{

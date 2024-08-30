@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
 	"github.com/SyarifKA/fgh21-go-event-organizer/models"
+	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,9 +53,9 @@ func ListAllWishlist(ctx *gin.Context) {
 }
 
 func ListWishlistEvent(ctx *gin.Context) {
-	var results []models.Events
+	var results []dtos.Events
 	for _, item := range models.FindAllWishlist() {
-		results = append(results, models.FindOneEventById(item.EventId))
+		results = append(results, repository.FindOneEventById(item.EventId))
 		// results = models.FindOneEventById(item.EventId)
 	}
 

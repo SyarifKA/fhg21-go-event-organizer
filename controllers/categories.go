@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
 	"github.com/SyarifKA/fgh21-go-event-organizer/models"
+	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,15 +28,10 @@ func ListAllCategories(ctx *gin.Context) {
 		page = 1
 	}
 
-	// if page > 1 {
-	// 	page = (page -1) * limit
-	// }
-	
-	
 	results, count := models.FindAllCategories(search, limit, page)
-	totalPage := math.Ceil(float64(count)/float64(limit))
+	totalPage := math.Ceil(float64(count) / float64(limit))
 
-	if page > int(totalPage){
+	if page > int(totalPage) {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Page not found",
@@ -46,46 +43,45 @@ func ListAllCategories(ctx *gin.Context) {
 
 	next := int(totalPage) - page
 	prev := page - 1
-	
+
 	pageInfo := lib.PageInfo{
 		TotalData: count,
 		TotalPage: int(totalPage),
-		Page: page,
-		Limit: limit,
-		Next: next,
-		Prev: prev,
+		Page:      page,
+		Limit:     limit,
+		Next:      next,
+		Prev:      prev,
 	}
 
 	ctx.JSON(http.StatusOK, lib.Response{
-		Success: true,
-		Message: "List All Categories",
+		Success:  true,
+		Message:  "List All Categories",
 		PageInfo: pageInfo,
-		Results: results,
+		Results:  results,
 	})
 }
 
 func DetailCategories(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	categories := models.FindOneCategoriesById(id)
-	if categories != (models.Categories{}){
+	if categories != (dtos.Categories{}) {
 		ctx.JSON(http.StatusOK, lib.Response{
 			Success: true,
 			Message: "Detail categories",
 			Results: categories,
 		})
-	}else{
+	} else {
 		ctx.JSON(http.StatusNotFound, lib.Response{
 			Success: false,
 			Message: "Categories not found",
-		})	
+		})
 	}
 }
 
 func CreateCategories(ctx *gin.Context) {
-	newCategories := models.Categories{}
+	newCategories := dtos.Categories{}
 
-	if err := ctx.ShouldBind(&newCategories)
-	err != nil {
+	if err := ctx.ShouldBind(&newCategories); err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "invalid input data",
@@ -94,7 +90,7 @@ func CreateCategories(ctx *gin.Context) {
 	}
 
 	data := models.CreateCategories(newCategories)
-	if data == (models.Categories{}) {
+	if data == (dtos.Categories{}) {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Failed to create user",
@@ -109,43 +105,43 @@ func CreateCategories(ctx *gin.Context) {
 }
 
 func UpdateCategories(c *gin.Context) {
-    param := c.Param("id")
-    id, _ := strconv.Atoi(param)
-    // data := models.FindAllUsers()
-    categories := models.Categories{}
-    err := c.Bind(&categories)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	param := c.Param("id")
+	id, _ := strconv.Atoi(param)
+	// data := models.FindAllUsers()
+	categories := dtos.Categories{}
+	err := c.Bind(&categories)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	categoriesUpdated := models.EditCategories(categories, id)
 
-    // result := models.User{}
-    // for _, v := range data {
-    //     if v.Id == id {
-    //         result = v
-    //     }
-    // }
+	// result := models.User{}
+	// for _, v := range data {
+	//     if v.Id == id {
+	//         result = v
+	//     }
+	// }
 
-    if categoriesUpdated.Id == 0 {
-        c.JSON(http.StatusNotFound, lib.Response{
-            Success: false,
-            Message: "categories whit id " + param + " not found",
-        })
-        return
-    }
-    // models.EditUser(categories.Email, categories.Username, categories.Password, param)
+	if categoriesUpdated.Id == 0 {
+		c.JSON(http.StatusNotFound, lib.Response{
+			Success: false,
+			Message: "categories whit id " + param + " not found",
+		})
+		return
+	}
+	// models.EditUser(categories.Email, categories.Username, categories.Password, param)
 
-    c.JSON(http.StatusOK, lib.Response{
-        Success: true,
-        Message: "categories with id " + param + " Edit Success",
-        Results: categoriesUpdated,
-    })
+	c.JSON(http.StatusOK, lib.Response{
+		Success: true,
+		Message: "categories with id " + param + " Edit Success",
+		Results: categoriesUpdated,
+	})
 }
 
 func DeleteCategories(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
-	dataUser := models.FindOneUserById(id)
+	dataUser := repository.FindOneUserById(id)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
@@ -156,7 +152,7 @@ func DeleteCategories(ctx *gin.Context) {
 	}
 	err = models.DeleteCategories(id)
 	fmt.Println(err)
-	if err != nil{
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
 			Message: "Id not found",

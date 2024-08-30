@@ -4,25 +4,21 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
 	"github.com/jackc/pgx/v5"
 )
 
-type Categories struct {
-	Id      int    `json:"id"`
-	Name 	string `json:"name" form:"name"`
-}
-
-func FindAllCategories(search string, limit int, page int) ([]Categories, int){
+func FindAllCategories(search string, limit int, page int) ([]dtos.Categories, int) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	offset := 0
 	if page > 1 {
-		offset = (page -1) * limit
+		offset = (page - 1) * limit
 	}
 	inputSQL := `select * from "categories" where "name" ilike '%' || $1 || '%' limit $2 offset $3`
-	rows, _ := db.Query(context.Background(), inputSQL , search, limit, offset)
-	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Categories])
+	rows, _ := db.Query(context.Background(), inputSQL, search, limit, offset)
+	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[dtos.Categories])
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -30,11 +26,11 @@ func FindAllCategories(search string, limit int, page int) ([]Categories, int){
 	return users, count
 }
 
-func TotalCategories(search string)int{
+func TotalCategories(search string) int {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	inputSQL := `select count(id) as "total" from "categories" where "name" ilike '%' || $1 || '%'`
-	rows:= db.QueryRow(context.Background(), inputSQL, search)
+	rows := db.QueryRow(context.Background(), inputSQL, search)
 	var result int
 	rows.Scan(
 		&result,
@@ -42,19 +38,19 @@ func TotalCategories(search string)int{
 	return result
 }
 
-func FindOneCategoriesById(id int) Categories {
+func FindOneCategoriesById(id int) dtos.Categories {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	rows, _ := db.Query(context.Background(), `select * from "categories" where "id" = $1`,
 		id,
 	)
-	categories, err := pgx.CollectRows(rows, pgx.RowToStructByPos[Categories])
+	categories, err := pgx.CollectRows(rows, pgx.RowToStructByPos[dtos.Categories])
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	category := Categories{}
+	category := dtos.Categories{}
 	for _, item := range categories {
 		if item.Id == id {
 			category = item
@@ -82,19 +78,17 @@ func FindOneCategoriesById(id int) Categories {
 // 	return user
 // }
 
-func CreateCategories(user Categories) Categories {
+func CreateCategories(user dtos.Categories) dtos.Categories {
 	db := lib.DB()
 	defer db.Close(context.Background())
-	// user.Password = lib.Encrypt(user.Password)
-	// fmt.Println(user)
 
 	row := db.QueryRow(
 		context.Background(),
 		`insert into "categories" (name) values ($1) returning "id", "name"`,
 		user.Name,
 	)
-	
-	var results Categories
+
+	var results dtos.Categories
 	row.Scan(
 		&results.Id,
 		&results.Name,
@@ -122,7 +116,7 @@ func DeleteCategories(id int) error {
 	return nil
 }
 
-func EditCategories(user Categories, id int) Categories{
+func EditCategories(user dtos.Categories, id int) dtos.Categories {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	// user.Password = lib.Encrypt(user.Password)

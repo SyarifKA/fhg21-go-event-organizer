@@ -3,20 +3,15 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
 	"github.com/SyarifKA/fgh21-go-event-organizer/models"
+	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
 )
 
-type FormTransactions struct{
-	EventId         	int `json:"eventId" form:"eventId" db:"event_id"`
-	PaymentMethodId 	int `json:"paymentMethodId" form:"paymentMethodId" db:"payment_method_id"`
-	SectionId       	[]int `json:"sectionId" form:"sectionId[]" db:"section_id"`
-	TicketQty       	[]int `json:"ticketQty" form:"ticketQty[]" db:"ticket_qty"`
-}
-
 func CreateTransaction(ctx *gin.Context) {
-	form := FormTransactions{}
+	form := dtos.FormTransactions{}
 
 	if err := ctx.ShouldBind(&form); err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
@@ -27,21 +22,21 @@ func CreateTransaction(ctx *gin.Context) {
 	}
 	// fmt.Println(form)
 
-	trx := models.CreateTransaction(models.Transactions{
-		UserId: ctx.GetInt("userId"),
+	trx := repository.CreateTransaction(models.Transactions{
+		UserId:          ctx.GetInt("userId"),
 		PaymentMethodId: form.PaymentMethodId,
-		EventId: form.EventId,
+		EventId:         form.EventId,
 	})
 
-	for i := range form.SectionId{
-		models.CreateTransactionDetail(models.TransactionDetail{
-				SectionId: form.SectionId[i],
-				TicketQty: form.TicketQty[i],
-				TransactionId: trx.Id,
+	for i := range form.SectionId {
+		repository.CreateTransactionDetail(models.TransactionDetail{
+			SectionId:     form.SectionId[i],
+			TicketQty:     form.TicketQty[i],
+			TransactionId: trx.Id,
 		})
 	}
 
-	data := models.DetailTransactions(trx.Id)
+	data := repository.DetailTransactions(trx.Id)
 	// if data == (models.DetailTransaction{}) {
 	// 	ctx.JSON(http.StatusBadRequest, lib.Response{
 	// 		Success: false,
@@ -57,10 +52,10 @@ func CreateTransaction(ctx *gin.Context) {
 	})
 }
 
-func FindTransactionByUserId(ctx *gin.Context){
+func FindTransactionByUserId(ctx *gin.Context) {
 	UserId := ctx.GetInt("userId")
 
-	detailTransactionbyId := models.FindTransactionByUserId(UserId)
+	detailTransactionbyId := repository.FindTransactionByUserId(UserId)
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
