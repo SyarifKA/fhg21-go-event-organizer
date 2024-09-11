@@ -8,9 +8,9 @@ type User struct {
 }
 
 type Password struct {
-	// OldPassword     string `json:"oldPassword" form:"oldPassword"`
-	NewPassword string `json:"newPassword" form:"newPassword" db:"password"`
-	// ConfirmPassword string `json:"confirmPassword" form:"confirmPassword"`
+	OldPassword     string `json:"oldPassword" form:"oldPassword"`
+	NewPassword     string `json:"newPassword" form:"newPassword" binding:"required,min=8" db:"password"`
+	ConfirmPassword string `json:"confirmPassword" form:"confirmPassword" binding:"required,min=8"`
 }
 
 type FormUser struct {

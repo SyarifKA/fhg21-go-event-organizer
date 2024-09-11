@@ -81,28 +81,6 @@ func FindOneUserByEmail(email string) dtos.User {
 	return user
 }
 
-// func CreateUser(user dtos.User) dtos.User {
-// 	db := lib.DB()
-// 	defer db.Close(context.Background())
-// 	user.Password = lib.Encrypt(user.Password)
-// 	// fmt.Println(user)
-
-// 	row := db.QueryRow(
-// 		context.Background(),
-// 		`insert into "users" (email, password, username) values ($1, $2, $3) returning "id", "email", "password", "username"`,
-// 		user.Email, user.Password, user.Username,
-// 	)
-
-// 	var results dtos.User
-// 	row.Scan(
-// 		&results.Id,
-// 		&results.Email,
-// 		&results.Password,
-// 		&results.Username,
-// 	)
-// 	return results
-// }
-
 func CreateUser(data models.Users) (models.Users, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
@@ -159,7 +137,7 @@ func DeleteUser(id int) error {
 	return nil
 }
 
-func EditUser(user dtos.Profiles, id int) dtos.Profiles {
+func EditUser(user models.UserUpdate, id int) (*models.UserUpdate, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 
@@ -167,38 +145,37 @@ func EditUser(user dtos.Profiles, id int) dtos.Profiles {
 
 	dataSql := `update "users" set (email , username) = ($1, $2) where id=$3 returning "id", "email", "username"`
 
-	edit := db.QueryRow(context.Background(), dataSql, user.Email, user.Username, id)
+	row, err := db.Query(context.Background(), dataSql, user.Email, user.Username, id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	result, err := pgx.CollectOneRow(row, pgx.RowToAddrOfStructByPos[models.UserUpdate])
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	var result dtos.Profiles
-	edit.Scan(
-		&result.Id,
-		&result.Email,
-		&result.Username,
-	)
-	fmt.Println(result)
-	// user.Id = id
-	return result
+	return result, err
 }
 
-func EditPassword(user dtos.Password, id int) dtos.User {
+func EditPassword(user models.UpdatePassword, id int) (models.UserUpdate, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	fmt.Println(user.NewPassword)
 	fmt.Println(id)
 	user.NewPassword = lib.Encrypt(user.NewPassword)
-	sql := `update "users" set "password" values $1 where "id" = $2 returning "id", "password"`
+	sql := `update users set password = $1 where id = $2 returning *`
 
-	change := db.QueryRow(context.Background(), sql, user.NewPassword, id)
+	change, err := db.Query(context.Background(), sql, user.NewPassword, id)
 
-	var result dtos.User
+	if err != nil {
+		return models.UserUpdate{}, err
+	}
 
-	change.Scan(
-		&result.Id,
-		&result.Email,
-		&result.Password,
-	)
-	return result
+	result, err := pgx.CollectOneRow(change, pgx.RowToStructByPos[models.UserUpdate])
+
+	if err != nil {
+		return models.UserUpdate{}, err
+	}
+
+	return result, err
 }

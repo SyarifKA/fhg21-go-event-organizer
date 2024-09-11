@@ -8,9 +8,8 @@ import (
 
 func ProfileRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.Use(middlewares.AuthMiddleware())
-	// routerGroup.GET("", controllers.ListAllCategories)
 	routerGroup.GET("", controllers.DataProfile)
-	// routerGroup.POST("", controllers.CreateTransaction)
+	routerGroup.GET("/login", controllers.FindProfileByUserId)
 	routerGroup.PATCH("", controllers.UpdateProfile)
-	// routerGroup.DELETE("/:id", controllers.DeleteCategories)
+	routerGroup.PATCH("/img", controllers.UploadProfileImage)
 }

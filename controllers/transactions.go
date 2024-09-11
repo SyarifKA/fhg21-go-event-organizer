@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
@@ -14,13 +15,13 @@ func CreateTransaction(ctx *gin.Context) {
 	form := dtos.FormTransactions{}
 
 	if err := ctx.ShouldBind(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "invalid input data",
-		})
+		lib.HandlerBadReq(ctx, "Invalid input data")
 		return
 	}
 	// fmt.Println(form)
+
+	// ctx.Bind(&form)
+	// user := ctx.GetInt("userId")
 
 	trx := repository.CreateTransaction(models.Transactions{
 		UserId:          ctx.GetInt("userId"),
@@ -28,15 +29,18 @@ func CreateTransaction(ctx *gin.Context) {
 		EventId:         form.EventId,
 	})
 
+	fmt.Println(form.SectionId)
+
 	for i := range form.SectionId {
 		repository.CreateTransactionDetail(models.TransactionDetail{
+			TransactionId: trx.Id,
 			SectionId:     form.SectionId[i],
 			TicketQty:     form.TicketQty[i],
-			TransactionId: trx.Id,
 		})
 	}
 
 	data := repository.DetailTransactions(trx.Id)
+
 	// if data == (models.DetailTransaction{}) {
 	// 	ctx.JSON(http.StatusBadRequest, lib.Response{
 	// 		Success: false,
@@ -44,12 +48,7 @@ func CreateTransaction(ctx *gin.Context) {
 	// 	})
 	// 	return
 	// }
-
-	ctx.JSON(http.StatusOK, lib.Response{
-		Success: true,
-		Message: "Transaction created successfully",
-		Results: data,
-	})
+	lib.HandlerOK(ctx, "Transaction created successfully", data, nil)
 }
 
 func FindTransactionByUserId(ctx *gin.Context) {

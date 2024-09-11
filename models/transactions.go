@@ -4,8 +4,8 @@ type Transactions struct {
 	Id              int `json:"id"`
 	EventId         int `json:"eventId" db:"event_id"`
 	PaymentMethodId int `json:"paymentMethodId" db:"payment_method_id"`
-	// SectionId       	[]int `json:"sectionId" form:"sectionId" db:"section_id"`
-	// TicketQty       	[]int `json:"ticketQty" form:"ticketQty" db:"ticket_qty"`
+	// SectionId       *[]int `json:"sectionId" form:"sectionId" db:"section_id"`
+	// TicketQty       *[]int `json:"ticketQty" form:"ticketQty" db:"ticket_qty"`
 	UserId int `json:"userId" db:"user_id"`
 }
 

@@ -27,9 +27,13 @@ type Profiles struct {
 	Picture       *string `json:"picture" db:"picture"`
 	FullName      string  `json:"fullName" form:"fullName" db:"full_name"`
 	BirthDate     *string `json:"birthDate" db:"birth_date"`
-	Gender        int     `json:"gender" db:"gender"`
+	Gender        int     `json:"gender" form:"gender" db:"gender"`
 	PhoneNumber   string  `json:"phoneNumber" form:"phoneNumber" db:"phone_number"`
-	Profession    *string `json:"profession" db:"profession"`
-	NationalityId *int    `json:"nationalityId" db:"nationality_id"`
+	Profession    *string `json:"profession" form:"profession" db:"profession"`
+	NationalityId *int    `json:"nationalityId" form:"nationalityId" db:"nationality_id"`
 	UserId        int     `json:"userId" db:"user_id"`
+}
+
+type UploadImageProfile struct {
+	Image string `json:"image" form:"profileImg"`
 }

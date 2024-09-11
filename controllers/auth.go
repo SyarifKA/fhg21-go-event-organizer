@@ -66,16 +66,12 @@ func AuthRegister(c *gin.Context) {
 		return
 	}
 
-	profile, err := repository.CreateProfile(models.Profile{
+	repository.CreateProfile(models.Profile{
 		FullName: formRegister.FullName,
-		UserId:   user.Id,
+		UserId:   &user.Id,
 	})
-	if err != nil {
-		lib.HandlerBadReq(c, "data not verified")
-		return
-	}
 
-	lib.HandlerOK(c, "Register success", profile, nil)
+	lib.HandlerOK(c, "Register success", user, nil)
 }
 
 func AuthLogin(ctx *gin.Context) {
@@ -88,7 +84,7 @@ func AuthLogin(ctx *gin.Context) {
 	if found == (dtos.User{}) {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
-			Message: "Wrong Email or Password1",
+			Message: "Wrong Email or Password",
 		})
 		return
 	}
@@ -96,23 +92,19 @@ func AuthLogin(ctx *gin.Context) {
 	if found.Email != user.Email && found.Password != user.Password {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
-			Message: "Wrong Email or Password2",
+			Message: "Wrong Email or Password",
 		})
 		return
 	}
 
 	isVerified := lib.Verify(user.Password, found.Password)
-	// fmt.Println(user.Password)
-	// fmt.Println(found.Password)
-	// fmt.Println(found.Id)
-	// fmt.Println(isVerified)
 	if isVerified {
 		JWToken := lib.GenerateUserIdToken(found.Id)
 		lib.HandlerOK(ctx, "Login success", dtos.Token{Token: JWToken}, nil)
 	} else {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{
 			Success: false,
-			Message: "Wrong Email or Password3",
+			Message: "Wrong Email or Password",
 		})
 	}
 }

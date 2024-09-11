@@ -69,38 +69,34 @@ func DetailEvent(ctx *gin.Context) {
 	}
 }
 
-func ListCreateEvent(ctx *gin.Context) {
-	newEvent := dtos.Events{}
-
-	if err := ctx.ShouldBind(&newEvent); err != nil {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "invalid input data",
-		})
-		return
-	}
-
-	createId := ctx.Keys["userId"]
-
-	idUser, _ := createId.(int)
-
-	newEvent.CreatedBy = &idUser
-	// createId := models.CreateUser(Id)
-	data := repository.CreateEvent(newEvent)
-	// fmt.Println(createId)
-	if data == (dtos.Events{}) {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "Failed to create event",
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, lib.Response{
-		Success: true,
-		Message: "Event created successfully",
-		Results: data,
-	})
-}
+// func ListCreateEvent(ctx *gin.Context) {
+// 	newEvent := dtos.Events{}
+// 	if err := ctx.ShouldBind(&newEvent); err != nil {
+// 		ctx.JSON(http.StatusBadRequest, lib.Response{
+// 			Success: false,
+// 			Message: "invalid input data",
+// 		})
+// 		return
+// 	}
+// 	createId := ctx.Keys["userId"]
+// 	idUser, _ := createId.(int)
+// 	newEvent.CreatedBy = idUser
+// 	// createId := models.CreateUser(Id)
+// 	data := repository.CreateEvent(newEvent)
+// 	// fmt.Println(createId)
+// 	if data == (models.Events{}) {
+// 		ctx.JSON(http.StatusBadRequest, lib.Response{
+// 			Success: false,
+// 			Message: "Failed to create event",
+// 		})
+// 		return
+// 	}
+// 	ctx.JSON(http.StatusOK, lib.Response{
+// 		Success: true,
+// 		Message: "Event created successfully",
+// 		Results: data,
+// 	})
+// }
 
 func DeleteEvent(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
@@ -193,4 +189,29 @@ func FindAllPaymentMethod(ctx *gin.Context) {
 		Message: "List payment methods",
 		Results: results,
 	})
+}
+
+func CreateEventById(ctx *gin.Context) {
+	id := ctx.GetInt("userId")
+
+	form := dtos.Events{}
+	err := ctx.Bind(&form)
+	fmt.Println(form)
+
+	// form.LocationId := 1
+	result, err := repository.CreateEvent(models.Events{
+		Image:       form.Image,
+		Title:       form.Title,
+		Date:        form.Date,
+		Description: form.Description,
+		LocationId:  form.LocationId,
+		CreatedBy:   &id,
+	})
+
+	if err != nil {
+		lib.HandlerBadReq(ctx, "Failed to create event")
+		return
+	}
+
+	lib.HandlerOK(ctx, "Create event success", result, nil)
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
+	"github.com/SyarifKA/fgh21-go-event-organizer/models"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -38,28 +39,24 @@ func TotalEvents(search string) int {
 	return result
 }
 
-func CreateEvent(event dtos.Events) dtos.Events {
+func CreateEvent(event models.Events) (models.Events, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
-	// fmt.Println(event)
+	fmt.Println(event)
 
-	row := db.QueryRow(
+	row, _ := db.Query(
 		context.Background(),
-		`insert into "events" (image, title, date, description, location_id, created_by) values ($1, $2, $3, $4, $5, $6) returning "id", "image", "title", "date", "description", "location_id", "created_by"`,
+		`insert into "events" (image, title, date, description, location_id, created_by) values ($1, $2, $3, $4, $5, $6) returning *`,
 		event.Image, event.Title, event.Date, event.Description, event.LocationId, event.CreatedBy,
 	)
 
-	results := dtos.Events{}
-	row.Scan(
-		&results.Id,
-		&results.Image,
-		&results.Title,
-		&results.Date,
-		&results.Description,
-		&results.LocationId,
-		&results.CreatedBy,
-	)
-	return results
+	result, err := pgx.CollectOneRow(row, pgx.RowToStructByPos[models.Events])
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result, err
 }
 
 func DeleteEvent(id int) error {

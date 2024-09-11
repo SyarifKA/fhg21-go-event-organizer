@@ -14,9 +14,7 @@ func Encrypt(password string) string {
 func Verify(plainPassword string, encryptedPassword string) bool {
 	ok, err := argon2.VerifyEncoded([]byte(plainPassword), []byte(encryptedPassword))
 	if err != nil {
-		// fmt.Println("eror")
 		panic(err)
-		// return false
 	}
 
 	if ok {

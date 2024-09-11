@@ -123,16 +123,24 @@ func CreateUser(c *gin.Context) {
 
 func UpdateUser(c *gin.Context) {
 	param := c.Param("id")
-	id, _ := strconv.Atoi(param)
+	// id, _ := strconv.Atoi(param)
 	// data := models.FindAllUsers()
+	id, _ := strconv.Atoi(param)
 	user := dtos.Profiles{}
 	err := c.Bind(&user)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	userUpdated := repository.EditUser(user, id)
+	userUpdated, err := repository.EditUser(models.UserUpdate{
+		Email:    *user.Email,
+		Username: user.Username,
+	}, id)
 	fmt.Println(userUpdated)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	if userUpdated.Id == 0 {
 		c.JSON(http.StatusNotFound, lib.Response{
@@ -156,16 +164,20 @@ func UpdateUserPassword(ctx *gin.Context) {
 
 	err := ctx.Bind(&user)
 	if err != nil {
-		fmt.Println(err)
+		lib.HandlerBadReq(ctx, "Failed to change password")
 		return
 	}
 
-	updatePassword := repository.EditPassword(user, id)
+	result, err := repository.EditPassword(models.UpdatePassword{
+		OldPassword:     user.OldPassword,
+		NewPassword:     user.NewPassword,
+		ConfirmPassword: user.ConfirmPassword,
+	}, id)
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
 		Message: "Update user password success",
-		Results: updatePassword,
+		Results: result,
 	})
 }
 

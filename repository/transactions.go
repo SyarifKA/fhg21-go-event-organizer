@@ -123,15 +123,22 @@ func FindTransactionByUserId(id int) []models.DetailTransaction {
     join "payment_methods" "pm" on "pm"."id" = "t"."payment_method_id"
     join "transaction_details" "td" on "td"."transaction_id" = "t"."id"
     join "event_sections" "es" on "es"."id" = "td"."section_id"
-    where "u"."id" = $1
+    where "t"."user_id" = $1
     group by  "t"."id", "p"."full_name", "e"."title", "e"."location_id", "e"."date", "pm"."name";`
 
-	rows, _ := db.Query(
+	rows, err := db.Query(
 		context.Background(),
 		inputSQL, id,
 	)
 
-	sectionEvent, _ := pgx.CollectRows(rows, pgx.RowToStructByPos[models.DetailTransaction])
+	if err != nil {
+		fmt.Errorf("Failed to get data")
+	}
 
+	sectionEvent, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.DetailTransaction])
+	if err != nil {
+		fmt.Errorf("Failed to get data")
+	}
+	fmt.Println(sectionEvent)
 	return sectionEvent
 }

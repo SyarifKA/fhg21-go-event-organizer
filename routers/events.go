@@ -11,8 +11,8 @@ func EventsRouter(routerGroup *gin.RouterGroup) {
 	routerGroup.GET("", controllers.ListAllEvents)
 	routerGroup.GET("/:id", controllers.DetailEvent)
 	routerGroup.GET("/section/:id", controllers.FindSectionsByEventId)
-	routerGroup.GET("/payment_method",middlewares.AuthMiddleware(), controllers.FindAllPaymentMethod)
-	routerGroup.POST("",middlewares.AuthMiddleware(), controllers.ListCreateEvent)
-	routerGroup.PATCH("/:id",middlewares.AuthMiddleware(), controllers.UpdateEvent)
-	routerGroup.DELETE("/:id",middlewares.AuthMiddleware(), controllers.DeleteEvent)
+	routerGroup.GET("/payment_method", middlewares.AuthMiddleware(), controllers.FindAllPaymentMethod)
+	routerGroup.POST("", middlewares.AuthMiddleware(), controllers.CreateEventById)
+	routerGroup.PATCH("/:id", middlewares.AuthMiddleware(), controllers.UpdateEvent)
+	routerGroup.DELETE("/:id", middlewares.AuthMiddleware(), controllers.DeleteEvent)
 }
