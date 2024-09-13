@@ -165,3 +165,27 @@ func DeleteCategories(ctx *gin.Context) {
 		Results: dataUser,
 	})
 }
+
+func FindEventsByCategoryId(ctx *gin.Context) {
+	form := dtos.GetEventCategories{}
+
+	err := ctx.Bind(&form)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(form.CategoryId)
+
+	result, err := repository.FindEventByCategoryId(form.CategoryId)
+
+	fmt.Println(result)
+
+	if err != nil {
+		lib.HandlerBadReq(ctx, "failed get event")
+		return
+	}
+
+	lib.HandlerOK(ctx, "Success get event by Id", result, nil)
+}

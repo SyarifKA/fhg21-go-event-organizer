@@ -9,6 +9,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type Categories struct {
+	Id    int    `json:"id"`
+	Image string `json:"image" db:"image"`
+	Title string `json:"title" db:"title"`
+	Date  string `json:"date" db:"date"`
+}
+
 func FindAllCategories(search string, limit int, page int) ([]dtos.Categories, int) {
 	db := lib.DB()
 	defer db.Close(context.Background())
@@ -58,25 +65,6 @@ func FindOneCategoriesById(id int) dtos.Categories {
 	}
 	return category
 }
-
-// func FindOneUserByEmail(email string) User {
-// 	db := lib.DB()
-// 	defer db.Close(context.Background())
-// 	rows, _ := db.Query(context.Background(), `select * from "users" where "email"=$1`,
-// 		email,
-// 	)
-// 	users, err := pgx.CollectRows(rows, pgx.RowToStructByPos[User])
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	user := User{}
-// 	for _, item := range users {
-// 		if item.Email == email {
-// 			user = item
-// 		}
-// 	}
-// 	return user
-// }
 
 func CreateCategories(user dtos.Categories) dtos.Categories {
 	db := lib.DB()
