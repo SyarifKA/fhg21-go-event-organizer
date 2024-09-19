@@ -9,6 +9,7 @@ import (
 func CategoriesRouter(routerGroup *gin.RouterGroup) {
 	// routerGroup.Use(middlewares.AuthMiddleware())
 	routerGroup.POST("/event-categories", controllers.FindEventsByCategoryId)
+	routerGroup.GET("", controllers.ListAllCategories)
 	routerGroup.GET("/:id", controllers.DetailCategories)
 	routerGroup.POST("", middlewares.AuthMiddleware(), controllers.CreateCategories)
 	routerGroup.PATCH("/:id", middlewares.AuthMiddleware(), controllers.UpdateCategories)

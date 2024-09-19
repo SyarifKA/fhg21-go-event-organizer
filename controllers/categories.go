@@ -8,7 +8,6 @@ import (
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
-	"github.com/SyarifKA/fgh21-go-event-organizer/models"
 	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -28,16 +27,11 @@ func ListAllCategories(ctx *gin.Context) {
 		page = 1
 	}
 
-	results, count := models.FindAllCategories(search, limit, page)
+	results, count := repository.FindAllCategories(search, limit, page)
 	totalPage := math.Ceil(float64(count) / float64(limit))
 
 	if page > int(totalPage) {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "Page not found",
-			// PageInfo: pageInfo,
-			// Results: results,
-		})
+		lib.HandlerBadReq(ctx, "Page not found")
 		return
 	}
 
@@ -53,28 +47,16 @@ func ListAllCategories(ctx *gin.Context) {
 		Prev:      prev,
 	}
 
-	ctx.JSON(http.StatusOK, lib.Response{
-		Success:  true,
-		Message:  "List All Categories",
-		PageInfo: pageInfo,
-		Results:  results,
-	})
+	lib.HandlerOK(ctx, "List All Categories", results, pageInfo)
 }
 
 func DetailCategories(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
-	categories := models.FindOneCategoriesById(id)
+	categories := repository.FindOneCategoriesById(id)
 	if categories != (dtos.Categories{}) {
-		ctx.JSON(http.StatusOK, lib.Response{
-			Success: true,
-			Message: "Detail categories",
-			Results: categories,
-		})
+		lib.HandlerOK(ctx, "Detail Categories", categories, nil)
 	} else {
-		ctx.JSON(http.StatusNotFound, lib.Response{
-			Success: false,
-			Message: "Categories not found",
-		})
+		lib.HandlerNotfound(ctx, "Categories not found")
 	}
 }
 
@@ -82,14 +64,11 @@ func CreateCategories(ctx *gin.Context) {
 	newCategories := dtos.Categories{}
 
 	if err := ctx.ShouldBind(&newCategories); err != nil {
-		ctx.JSON(http.StatusBadRequest, lib.Response{
-			Success: false,
-			Message: "invalid input data",
-		})
+		lib.HandlerBadReq(ctx, "Invalid input data")
 		return
 	}
 
-	data := models.CreateCategories(newCategories)
+	data := repository.CreateCategories(newCategories)
 	if data == (dtos.Categories{}) {
 		ctx.JSON(http.StatusBadRequest, lib.Response{
 			Success: false,
@@ -114,14 +93,7 @@ func UpdateCategories(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	categoriesUpdated := models.EditCategories(categories, id)
-
-	// result := models.User{}
-	// for _, v := range data {
-	//     if v.Id == id {
-	//         result = v
-	//     }
-	// }
+	categoriesUpdated := repository.EditCategories(categories, id)
 
 	if categoriesUpdated.Id == 0 {
 		c.JSON(http.StatusNotFound, lib.Response{
@@ -130,7 +102,6 @@ func UpdateCategories(c *gin.Context) {
 		})
 		return
 	}
-	// models.EditUser(categories.Email, categories.Username, categories.Password, param)
 
 	c.JSON(http.StatusOK, lib.Response{
 		Success: true,
@@ -150,7 +121,7 @@ func DeleteCategories(ctx *gin.Context) {
 		})
 		return
 	}
-	err = models.DeleteCategories(id)
+	err = repository.DeleteCategories(id)
 	fmt.Println(err)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, lib.Response{

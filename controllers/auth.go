@@ -79,7 +79,6 @@ func AuthLogin(ctx *gin.Context) {
 	ctx.Bind(&user)
 
 	found := repository.FindOneUserByEmail(user.Email)
-	// fmt.Println(found)
 
 	if found == (dtos.User{}) {
 		ctx.JSON(http.StatusUnauthorized, lib.Response{

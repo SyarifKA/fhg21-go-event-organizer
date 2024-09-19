@@ -7,7 +7,6 @@ import (
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
-	"github.com/SyarifKA/fgh21-go-event-organizer/models"
 	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,7 @@ func CreateWishlist(ctx *gin.Context) {
 
 	eventId, _ := strconv.Atoi(ctx.Param("id"))
 
-	dataWishlist := models.FindAllWishlist()
+	dataWishlist := repository.FindAllWishlist()
 	fmt.Println(dataWishlist)
 
 	for _, item := range dataWishlist {
@@ -25,15 +24,12 @@ func CreateWishlist(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, lib.Response{
 				Success: false,
 				Message: "Cannot add same wishlist",
-				// Results: inputWishlist,
 			})
 			return
 		}
 	}
 
-	inputWishlist := models.InputWishList(userId, eventId)
-
-	// fmt.Println(inputWishlist.EventId)
+	inputWishlist := repository.InputWishList(userId, eventId)
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
@@ -43,7 +39,7 @@ func CreateWishlist(ctx *gin.Context) {
 }
 
 func ListAllWishlist(ctx *gin.Context) {
-	results := models.FindAllWishlist()
+	results := repository.FindAllWishlist()
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
@@ -54,9 +50,8 @@ func ListAllWishlist(ctx *gin.Context) {
 
 func ListWishlistEvent(ctx *gin.Context) {
 	var results []dtos.Events
-	for _, item := range models.FindAllWishlist() {
+	for _, item := range repository.FindAllWishlist() {
 		results = append(results, repository.FindOneEventById(item.EventId))
-		// results = models.FindOneEventById(item.EventId)
 	}
 
 	ctx.JSON(http.StatusOK, lib.Response{

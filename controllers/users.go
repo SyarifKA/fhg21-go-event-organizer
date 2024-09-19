@@ -123,8 +123,7 @@ func CreateUser(c *gin.Context) {
 
 func UpdateUser(c *gin.Context) {
 	param := c.Param("id")
-	// id, _ := strconv.Atoi(param)
-	// data := models.FindAllUsers()
+
 	id, _ := strconv.Atoi(param)
 	user := dtos.Profiles{}
 	err := c.Bind(&user)
