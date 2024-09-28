@@ -106,11 +106,11 @@ func UploadProfileImage(c *gin.Context) {
 		return
 	}
 
-	tes := "http://localhost:8888/img/profile/" + newFile
+	tes := "http://103.93.58.89:21215/img/profile/" + newFile
 
 	delImgBefore := repository.FindProfileByUserId(id)
 	if delImgBefore.Picture != nil {
-		fileDel := strings.Split(*delImgBefore.Picture, "8888")[1]
+		fileDel := strings.Split(*delImgBefore.Picture, "21215")[1]
 		os.Remove("." + fileDel)
 	}
 
