@@ -110,8 +110,9 @@ func UploadProfileImage(c *gin.Context) {
 
 	delImgBefore := repository.FindProfileByUserId(id)
 	if delImgBefore.Picture != nil {
-		fileDel := strings.Split(*delImgBefore.Picture, "8888")[1]
-		os.Remove("." + fileDel)
+		// fileDel := strings.Split(*delImgBefore.Picture, "8888")[1]
+		// os.Remove("." + fileDel)
+		os.Remove(*delImgBefore.Picture)
 	}
 
 	profile, err := repository.UpdateProfileImage(models.Profile{Picture: &tes}, id)
