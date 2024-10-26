@@ -107,7 +107,7 @@ func EditEvent(data dtos.Events, id int) dtos.Events {
 
 	dataSql := `update "events" set (image , title, date, description) = ($1, $2, $3, $4) where "id" = $5`
 
-	db.Exec(context.Background(), dataSql, data.Image, data.Title, data.Date, data.Description, id)
+	db.Exec(context.Background(), dataSql, data.Title, data.Date, data.Description, id)
 	data.Id = id
 	return data
 }

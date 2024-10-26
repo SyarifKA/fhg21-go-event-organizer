@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
 	"github.com/SyarifKA/fgh21-go-event-organizer/models"
 	"github.com/SyarifKA/fgh21-go-event-organizer/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func ListAllEvents(ctx *gin.Context) {
@@ -194,13 +197,43 @@ func FindAllPaymentMethod(ctx *gin.Context) {
 func CreateEventById(ctx *gin.Context) {
 	id := ctx.GetInt("userId")
 
+	formCategories := dtos.EventCategories{}
 	form := dtos.Events{}
 	err := ctx.Bind(&form)
-	fmt.Println(form)
+	ctx.Bind(&formCategories)
 
-	// form.LocationId := 1
+	maxFile := 500 * 1024
+	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, int64(maxFile))
+
+	file, err := ctx.FormFile("eventImg")
+	if err != nil {
+		if err.Error() == "http: request body too large" {
+			lib.HandlerMaxFile(ctx, "file size too large, max capacity 500 kb")
+			return
+		}
+		lib.HandlerBadReq(ctx, "not file to upload")
+		return
+	}
+
+	allowExt := map[string]bool{".jpg": true, ".jpeg": true, ".png": true}
+	fileExt := strings.ToLower(filepath.Ext(file.Filename))
+	if !allowExt[fileExt] {
+		lib.HandlerBadReq(ctx, "extension file not validate")
+		return
+	}
+
+	newFile := uuid.New().String() + fileExt
+
+	uploadDir := "./img/event/"
+	if err := ctx.SaveUploadedFile(file, uploadDir+newFile); err != nil {
+		lib.HandlerBadReq(ctx, "upload failed")
+		return
+	}
+
+	tes := "/img/event/" + newFile
+
 	result, err := repository.CreateEvent(models.Events{
-		Image:       form.Image,
+		Image:       tes,
 		Title:       form.Title,
 		Date:        form.Date,
 		Description: form.Description,
@@ -212,6 +245,12 @@ func CreateEventById(ctx *gin.Context) {
 		lib.HandlerBadReq(ctx, "Failed to create event")
 		return
 	}
+
+	repository.CreateEventCategories(models.EventCategories{
+		// Id:         formCategories.Id,
+		EventId:    result.Id,
+		CategoryId: form.CategoryId,
+	})
 
 	lib.HandlerOK(ctx, "Create event success", result, nil)
 }
