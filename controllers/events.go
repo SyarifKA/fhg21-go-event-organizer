@@ -198,9 +198,11 @@ func CreateEventById(ctx *gin.Context) {
 	id := ctx.GetInt("userId")
 
 	formCategories := dtos.EventCategories{}
+	formSection := dtos.SectionEvent{}
 	form := dtos.Events{}
 	err := ctx.Bind(&form)
 	ctx.Bind(&formCategories)
+	ctx.Bind(&formSection)
 
 	maxFile := 500 * 1024
 	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, int64(maxFile))
@@ -247,9 +249,15 @@ func CreateEventById(ctx *gin.Context) {
 	}
 
 	repository.CreateEventCategories(models.EventCategories{
-		// Id:         formCategories.Id,
 		EventId:    result.Id,
 		CategoryId: form.CategoryId,
+	})
+
+	repository.CreateEventSection(models.SectionEvent{
+		Name:     formSection.Name,
+		Price:    formSection.Price,
+		Quantity: formSection.Quantity,
+		EventId:  result.Id,
 	})
 
 	lib.HandlerOK(ctx, "Create event success", result, nil)

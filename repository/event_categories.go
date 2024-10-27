@@ -20,8 +20,7 @@ func CreateEventCategories(user models.EventCategories) models.EventCategories {
 		return models.EventCategories{}
 	}
 
-	categories, _ := pgx.CollectOneRow(row, pgx.RowToStructByName[models.EventCategories])
+	categories, _ := pgx.CollectOneRow(row, pgx.RowToStructByPos[models.EventCategories])
 
 	return categories
-
 }
