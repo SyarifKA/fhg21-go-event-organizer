@@ -1,23 +1,31 @@
-# FROM golang:1.23
+# FROM golang:1.23-alpine
 
 # WORKDIR /app
 
 # COPY . /app/
 
-# RUN go mod tidy
+# RUN go mod tidy && go build -o binary
 
-# ENTRYPOINT go run main.go
+# EXPOSE 8888
 
-# CMD [ "go", "run", "main.go" ]
+# ENTRYPOINT [ "/app/binary" ]
 
-FROM golang:1.23-alpine
+FROM golang:1.23-alpine AS build
 
 WORKDIR /app
 
 COPY . /app/
 
-RUN go mod tidy && go build -o binary
+RUN go mod tidy && go build -o /app/backend
 
-EXPOSE 8888
+FROM alpine:3.20
 
-ENTRYPOINT [ "/app/binary" ]
+WORKDIR /app
+
+COPY --from=build /app /app
+
+ENV PATH="/app:${PATH}"
+
+EXPOSE 8080
+
+ENTRYPOINT [ "backend" ]
