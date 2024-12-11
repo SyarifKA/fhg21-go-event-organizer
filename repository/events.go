@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func FindAllEvents(search string, limit int, page int) ([]dtos.Events, int) {
+func FindAllEvents(search string, limit int, page int) ([]models.Events, int) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	offset := 0
@@ -19,7 +19,7 @@ func FindAllEvents(search string, limit int, page int) ([]dtos.Events, int) {
 	}
 	inputSQL := `select * from "events" where "title" ilike '%' || $1 || '%' limit $2 offset $3`
 	rows, _ := db.Query(context.Background(), inputSQL, search, limit, offset)
-	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[dtos.Events])
+	events, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.Events])
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -79,24 +79,18 @@ func DeleteEvent(id int) error {
 	return nil
 }
 
-func FindOneEventById(id int) dtos.Events {
+func FindOneEventById(id int) models.Events {
 	db := lib.DB()
 	defer db.Close(context.Background())
 	rows, _ := db.Query(context.Background(), `select * from "events" where "id" = $1`,
 		id,
 	)
-	events, err := pgx.CollectOneRow(rows, pgx.RowToStructByPos[dtos.Events])
+	events, err := pgx.CollectOneRow(rows, pgx.RowToStructByPos[models.Events])
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	// event := Events{}
-	// for _, item := range events {
-	// 	if item.Id == id {
-	// 		event = item
-	// 	}
-	// }
 	return events
 }
 

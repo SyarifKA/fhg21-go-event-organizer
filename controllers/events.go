@@ -58,7 +58,7 @@ func DetailEvent(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	eventDetail := repository.FindOneEventById(id)
 	fmt.Println(eventDetail)
-	if eventDetail != (dtos.Events{}) {
+	if eventDetail != (models.Events{}) {
 		ctx.JSON(http.StatusOK, lib.Response{
 			Success: true,
 			Message: "Detail event",
@@ -67,7 +67,7 @@ func DetailEvent(ctx *gin.Context) {
 	} else {
 		ctx.JSON(http.StatusNotFound, lib.Response{
 			Success: false,
-			Message: "User not found",
+			Message: "Event not found",
 		})
 	}
 }
