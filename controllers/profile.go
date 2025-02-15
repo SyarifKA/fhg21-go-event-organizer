@@ -48,11 +48,12 @@ func UpdateProfile(ctx *gin.Context) {
 	// }
 
 	repository.EditProfile(models.UpdateProfile{
-		FullName:    form.FullName,
-		PhoneNumber: form.PhoneNumber,
-		Gender:      form.Gender,
-		Profession:  *form.Profession,
-		UserId:      id,
+		FullName:      form.FullName,
+		PhoneNumber:   form.PhoneNumber,
+		Gender:        form.Gender,
+		Profession:    *form.Profession,
+		NationalityId: form.NationalityId,
+		UserId:        id,
 	})
 
 	// if profileUpdated.Id == 0 {
