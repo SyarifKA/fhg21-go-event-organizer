@@ -78,8 +78,8 @@ func EditProfile(data models.UpdateProfile) (*models.Profile, error) {
 
 	fmt.Println(data.PhoneNumber)
 
-	sqlProfile := `update "profile" set (full_name, phone_number, gender, profession, nationality_id) = ($1, $2, $3, $4, $5) where id = $6 returning *`
-	row, err := db.Query(context.Background(), sqlProfile, data.FullName, data.PhoneNumber, data.Gender, data.Profession, data.NationalityId, data.UserId)
+	sqlProfile := `update "profile" set (full_name, birth_date, phone_number, gender, profession, nationality_id) = ($1, $2, $3, $4, $5, $6) where id = $7 returning *`
+	row, err := db.Query(context.Background(), sqlProfile, data.FullName, data.BirthDate, data.PhoneNumber, data.Gender, data.Profession, data.NationalityId, data.UserId)
 
 	if err != nil {
 		fmt.Println(err)

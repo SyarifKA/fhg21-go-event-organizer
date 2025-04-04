@@ -36,6 +36,16 @@ func UpdateProfile(ctx *gin.Context) {
 		fmt.Println(err)
 		return
 	}
+
+	// 	var birthdate time.Time
+	// err := row.Scan(&birthdate)
+	// if err != nil {
+	//     log.Fatal(err)
+	// }
+	// birthdateStr := birthdate.Format("2006-01-02") // Konversi ke string
+	// fmt.Println(birthdateStr)
+
+	// err := row.Scan(&form.BirthDate)
 	// fmt.Println(profile)
 	userUpdated, _ := repository.EditUser(models.UserUpdate{
 		Email:    *form.Email,
@@ -49,21 +59,13 @@ func UpdateProfile(ctx *gin.Context) {
 
 	repository.EditProfile(models.UpdateProfile{
 		FullName:      form.FullName,
+		BirthDate:     form.BirthDate,
 		PhoneNumber:   form.PhoneNumber,
 		Gender:        form.Gender,
 		Profession:    *form.Profession,
 		NationalityId: form.NationalityId,
 		UserId:        id,
 	})
-
-	// if profileUpdated.Id == 0 {
-	//     ctx.JSON(http.StatusNotFound, lib.Response{
-	//         Success: false,
-	//         Message: "Profile not found",
-	//     })
-	//     return
-	// }
-	// fmt.Println(profileUpdated)
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
