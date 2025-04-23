@@ -4,6 +4,7 @@ create table "events" (
     "title" varchar(50),
     "date" varchar(30),
     "description" text,
-    "location_id" int references "locations"("id"),
+    -- "location_id" int references "locations"("id"),
+    "location_id" int,
     "created_by" int references "users"("id")
 );

@@ -68,7 +68,7 @@ func AuthRegister(c *gin.Context) {
 
 	repository.CreateProfile(models.Profile{
 		FullName: formRegister.FullName,
-		UserId:   &user.Id,
+		UserId:   user.Id,
 	})
 
 	lib.HandlerOK(c, "Register success", user, nil)

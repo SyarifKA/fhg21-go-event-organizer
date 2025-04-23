@@ -6,6 +6,6 @@ type Events struct {
 	Title       string `json:"title" db:"title"`
 	Date        string `json:"date" db:"date"`
 	Description string `json:"description" db:"description"`
-	LocationId  *int   `json:"locationId" db:"location_id"`
-	CreatedBy   *int   `json:"createdBy" db:"created_id"`
+	LocationId  int    `json:"locationId" db:"location_id"`
+	CreatedBy   int    `json:"createdBy" db:"created_id"`
 }

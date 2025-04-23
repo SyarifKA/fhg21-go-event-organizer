@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/SyarifKA/fgh21-go-event-organizer/dtos"
 	"github.com/SyarifKA/fgh21-go-event-organizer/lib"
@@ -18,7 +19,7 @@ import (
 
 func DataProfile(ctx *gin.Context) {
 	userId := ctx.GetInt("userId")
-	fmt.Println(userId)
+	// fmt.Println(userId)
 	dataProfile := repository.FindProfileByUserId(userId)
 
 	ctx.JSON(http.StatusOK, lib.Response{
@@ -37,35 +38,29 @@ func UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	// 	var birthdate time.Time
-	// err := row.Scan(&birthdate)
-	// if err != nil {
-	//     log.Fatal(err)
-	// }
-	// birthdateStr := birthdate.Format("2006-01-02") // Konversi ke string
-	// fmt.Println(birthdateStr)
+	birthDate, err := time.Parse("2006-01-02", form.BirthDateStr)
+	if err != nil {
+		fmt.Println("BirthDate parse error:", err)
+		birthDate = time.Time{} // atau return error
+	}
 
-	// err := row.Scan(&form.BirthDate)
-	// fmt.Println(profile)
+
 	userUpdated, _ := repository.EditUser(models.UserUpdate{
 		Email:    *form.Email,
 		Username: form.Username,
 	}, id)
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
 	repository.EditProfile(models.UpdateProfile{
 		FullName:      form.FullName,
-		BirthDate:     form.BirthDate,
+		BirthDate:     birthDate,
 		PhoneNumber:   form.PhoneNumber,
 		Gender:        form.Gender,
 		Profession:    *form.Profession,
 		NationalityId: form.NationalityId,
 		UserId:        id,
 	})
+
+	// fmt.Println(id)
 
 	ctx.JSON(http.StatusOK, lib.Response{
 		Success: true,
@@ -113,12 +108,12 @@ func UploadProfileImage(c *gin.Context) {
 
 	delImgBefore := repository.FindProfileByUserId(id)
 	if delImgBefore.Picture != nil {
-		// fileDel := strings.Split(*delImgBefore.Picture, "8888")[1]
-		// os.Remove("." + fileDel)
-		os.Remove(*delImgBefore.Picture)
+		fileDel := strings.Split(*delImgBefore.Picture, "8888")[1]
+		os.Remove("." + fileDel)
+		// os.Remove(*delImgBefore.Picture)
 	}
 
-	profile, err := repository.UpdateProfileImage(models.Profile{Picture: &tes}, id)
+	profile, err := repository.UpdateProfileImage(models.Profile{Picture: tes}, id)
 	if err != nil {
 		lib.HandlerBadReq(c, "upload failed")
 		return

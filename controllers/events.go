@@ -197,13 +197,12 @@ func FindAllPaymentMethod(ctx *gin.Context) {
 func CreateEventById(ctx *gin.Context) {
 	id := ctx.GetInt("userId")
 
-	formCategories := dtos.EventCategories{}
-	formSection := dtos.SectionEvent{}
 	form := dtos.Events{}
-	err := ctx.Bind(&form)
-	ctx.Bind(&formCategories)
-	ctx.Bind(&formSection)
-
+	
+	if err := ctx.ShouldBind(&form); err != nil {
+		lib.HandlerBadReq(ctx, "Invalid event form data")
+		return
+	}
 	maxFile := 500 * 1024
 	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, int64(maxFile))
 
@@ -234,13 +233,14 @@ func CreateEventById(ctx *gin.Context) {
 
 	tes := "/img/event/" + newFile
 
-	result, err := repository.CreateEvent(models.Events{
-		Image:       tes,
+	result, err := repository.CreateEvent(dtos.Events{
 		Title:       form.Title,
 		Date:        form.Date,
 		Description: form.Description,
 		LocationId:  form.LocationId,
 		CreatedBy:   &id,
+		}, dtos.ImageEvent{	
+			Image:       tes,
 	})
 
 	if err != nil {
@@ -248,17 +248,29 @@ func CreateEventById(ctx *gin.Context) {
 		return
 	}
 
+	formCategories := dtos.EventCategories{}
+	if err := ctx.ShouldBind(&formCategories); err != nil {
+		lib.HandlerBadReq(ctx, "Invalid event category data")
+		return
+	}
+	
 	repository.CreateEventCategories(models.EventCategories{
 		EventId:    result.Id,
 		CategoryId: form.CategoryId,
 	})
-
+	formSection := dtos.SectionEvent{}
+	
+	if err := ctx.ShouldBind(&formSection); err != nil {
+		fmt.Println("gagal 3")
+		lib.HandlerBadReq(ctx, "Invalid section event data")
+		return
+	}	
 	repository.CreateEventSection(models.SectionEvent{
 		Name:     formSection.Name,
 		Price:    formSection.Price,
 		Quantity: formSection.Quantity,
 		EventId:  result.Id,
 	})
-
+	
 	lib.HandlerOK(ctx, "Create event success", result, nil)
 }

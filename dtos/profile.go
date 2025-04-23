@@ -1,7 +1,5 @@
 package dtos
 
-import "time"
-
 type Profile struct {
 	Id            int     `json:"id" db:"id"`
 	Picture       *string `json:"picture" db:"picture"`
@@ -22,18 +20,32 @@ type JoinProfile struct {
 	Profile  Profile
 }
 
+// type Profiles struct {
+// 	Id            int       `json:"id" db:"id"`
+// 	Email         *string   `json:"email" form:"email"`
+// 	Username      *string   `json:"username" form:"username"`
+// 	Picture       *string   `json:"picture" db:"picture"`
+// 	FullName      string    `json:"fullName" form:"fullName" db:"full_name"`
+// 	BirthDate     time.Time `json:"birthDate" form:"birthDate" db:"birth_date"`
+// 	Gender        int       `json:"gender" form:"gender" db:"gender"`
+// 	PhoneNumber   string    `json:"phoneNumber" form:"phoneNumber" db:"phone_number"`
+// 	Profession    *string   `json:"profession" form:"profession" db:"profession"`
+// 	NationalityId *int      `json:"nationalityId" form:"nationalityId" db:"nationality_id"`
+// 	UserId        int       `json:"userId" db:"user_id"`
+// }
+
 type Profiles struct {
-	Id            int       `json:"id" db:"id"`
-	Email         *string   `json:"email" form:"email"`
-	Username      *string   `json:"username" form:"username"`
-	Picture       *string   `json:"picture" db:"picture"`
-	FullName      string    `json:"fullName" form:"fullName" db:"full_name"`
-	BirthDate     time.Time `json:"birthDate" form:"birthDate" db:"birth_date"`
-	Gender        int       `json:"gender" form:"gender" db:"gender"`
-	PhoneNumber   string    `json:"phoneNumber" form:"phoneNumber" db:"phone_number"`
-	Profession    *string   `json:"profession" form:"profession" db:"profession"`
-	NationalityId *int      `json:"nationalityId" form:"nationalityId" db:"nationality_id"`
-	UserId        int       `json:"userId" db:"user_id"`
+	Id            int     `json:"id" db:"id"`
+	Email         *string `json:"email" form:"email"`
+	Username      *string `json:"username" form:"username"`
+	Picture       *string `json:"picture" db:"picture"`
+	FullName      string  `json:"fullName" form:"fullName" db:"full_name"`
+	BirthDateStr  string  `json:"birthDate" form:"birthDate"` // <--- ubah jadi string
+	Gender        int     `json:"gender" form:"gender" db:"gender"`
+	PhoneNumber   string  `json:"phoneNumber" form:"phoneNumber" db:"phone_number"`
+	Profession    *string `json:"profession" form:"profession" db:"profession"`
+	NationalityId *int    `json:"nationalityId" form:"nationalityId" db:"nationality_id"`
+	UserId        int     `json:"userId" db:"user_id"`
 }
 
 type UploadImageProfile struct {
