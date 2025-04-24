@@ -83,7 +83,7 @@ func FindProfileByUserId(id int) models.FindProfileById {
 	
 	profile, _ := pgx.CollectOneRow(rows, pgx.RowToStructByPos[models.FindProfileById])
 	// fmt.Println(profile)
-	fmt.Println(profile)
+	// fmt.Println(profile)
 	return profile
 }
 

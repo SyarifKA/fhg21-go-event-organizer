@@ -129,7 +129,7 @@ func FindProfileByUserId(c *gin.Context) {
 	}
 
 	profile := repository.FindProfileByUserId(id)
-	fmt.Println(id)
+	// fmt.Println(id)
 
 	// if err != nil {
 	// 	lib.HandlerBadReq(c, "Profile not found ")
