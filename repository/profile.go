@@ -73,7 +73,7 @@ func FindProfileByUserId(id int) models.FindProfileById {
 		"p"."nationality_id",
 		"p"."user_id"
 		FROM "users" "u"
-		LEFT JOIN "profile" "p" ON "p"."id" = "p"."user_id"
+		LEFT JOIN "profile" "p" ON "u"."id" = "p"."user_id"
 		WHERE "u"."id" = $1`
 
 	rows, _ := db.Query(
@@ -83,7 +83,7 @@ func FindProfileByUserId(id int) models.FindProfileById {
 	
 	profile, _ := pgx.CollectOneRow(rows, pgx.RowToStructByPos[models.FindProfileById])
 	// fmt.Println(profile)
-	// fmt.Println(profile)
+	fmt.Println(profile)
 	return profile
 }
 

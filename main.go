@@ -9,6 +9,7 @@ import (
 func main() {
 	r := gin.Default()
 	r.Static("/img/profile", "./img/profile")
+	r.Static("/img/event", "./img/event")
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
